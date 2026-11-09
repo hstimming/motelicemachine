@@ -74,7 +74,14 @@
     event.preventDefault();if(!db)return;
     const submit = event.target.querySelector('[type="submit"]');
     const errorElement=$('login-error');errorElement.textContent='';
-    const form = new FormData(event.target);
+    
+    const formElement = event.target.closest('form');
+    if (!formElement) {
+      console.error('Login failed: HTML form not found.');
+      return;
+    }
+    const form = new FormData(formElement);
+
     const {data,error}=await db.auth.signInWithPassword({email:String(form.get('email')).trim(),password:String(form.get('password'))});
     if(error){errorElement.textContent=/invalid login credentials|invalid credentials/i.test(error.message)?'Incorrect email or password. Please try again.':'Could not sign in: '+error.message;submit.disabled=false;return;}
     const {data:member,error:memberErr}=await db.from('band_members').select('user_id').eq('user_id',data.user.id).maybeSingle();
