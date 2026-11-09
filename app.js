@@ -5,8 +5,9 @@
   const configured = /^https:\/\/[^ ]+\.supabase\.co\/?$/.test(cfg.supabaseUrl || '') &&
     typeof cfg.supabaseKey === 'string' && !cfg.supabaseKey.startsWith('PASTE_');
   const db = configured && window.supabase ? window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey) : null;
+  const showHistory = window.MOTEL_SHOW_SETLISTS || [];
   const $ = id => document.getElementById(id);
-  const state = { member: false, user: null, events: [], songs: [], votes: [], setlists: [], setlistSongs: [], tab: 'events', setId: null, about: null };
+  const state = { member: false, user: null, events: [], songs: [], votes: [], setlists: [], setlistSongs: [], eventsLoaded: false, eventsError: false, tab: 'events', setId: null, about: null };
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const validUrl = url => { try { const parsed = new URL(url); return ['https:', 'http:'].includes(parsed.protocol) ? parsed.href : ''; } catch { return ''; } };
   const linkForSong = s => validUrl(s.tab_url) || `https://www.ultimate-guitar.com/search.php?search=${encodeURIComponent(`${s.title} ${s.artist}`)}`;
@@ -21,23 +22,85 @@
   function updateMenu() {
     $('band-menu-link').textContent = state.member ? '🔓 Band workspace' : '🔒 Band login';
   }
-  function eventCards(manage=false) {
-    const events = manage ? state.events : state.events.filter(e=>e.show_date >= today());
-    if (!events.length) return `<div class="empty">${manage?'No shows yet. Use ADD SHOW to publish one.':'Next show to be announced. Check back soon.'}</div>`;
+  function eventCards(manage=false, past=false) {
+    if (state.eventsError && !state.eventsLoaded) return '<div class="empty" role="status">Shows are temporarily unavailable. Please try again shortly.</div>';
+    if (!state.eventsLoaded && !showHistory.length) return '<div class="empty" role="status">Loading shows…</div>';
+    const available = manage ? state.events : publicEvents();
+    const events = manage ? available : available.filter(e=>e.show_date && (past ? e.show_date < today() : e.show_date >= today()));
+    if (past) events.sort((a,b)=>b.show_date.localeCompare(a.show_date));
+    if (!events.length) return `<div class="empty">${manage?'No shows yet. Use ADD SHOW to publish one.':past?'No past shows listed yet.':'Next show to be announced. Check back soon.'}</div>`;
     return events.map(e=>{
-      const date=dateParts(e.show_date);
+      const date=e.show_date ? dateParts(e.show_date) : null;
+      const isPast=!!e.show_date && e.show_date < today();
       const link=validUrl(e.ticket_url);
-      return `<article class="event-card"><div class="event-date"><small>${date.month}</small><b>${date.day}</b></div><div class="event-info"><h3>${escapeHTML(e.name)}</h3><p>${escapeHTML(e.venue)} · ${escapeHTML(e.city)}${e.show_time?' · '+escapeHTML(e.show_time):''}</p>${link?`<a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">TICKETS / INFO ↗</a>`:''}</div>${manage?`<div class="event-actions"><button class="small-button" data-action="edit-event" data-id="${e.id}">EDIT</button><button class="small-button danger" data-action="delete-event" data-id="${e.id}">DELETE</button></div>`:''}</article>`;
+      const snapshot=historyForEvent(e);
+      const details=[e.venue,e.city,e.show_time].filter(Boolean).map(escapeHTML).join(' · ');
+      return `<article class="event-card${isPast?' past-event':''}"><div class="event-date">${date?`<small>${date.month}</small><b>${date.day}</b><small>${escapeHTML(e.show_date.slice(0,4))}</small>`:'<small>DATE<br>TBA</small>'}</div><div class="event-info">${isPast?'<span class="event-status">PAST SHOW</span>':''}<h3>${escapeHTML(e.name)}</h3>${snapshot?.firstShow?'<p>Our first show.</p>':''}${details?`<p>${details}</p>`:''}${!manage && snapshot && isPast ? publicSetlist(snapshot) : ''}${link?`<a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">${isPast?'EVENT DETAILS':'TICKETS / INFO'} ↗</a>`:''}</div>${manage?`<div class="event-actions"><button class="small-button" data-action="edit-event" data-id="${e.id}">EDIT</button><button class="small-button danger" data-action="delete-event" data-id="${e.id}">DELETE</button></div>`:''}</article>`;
     }).join('');
+  }
+  const normalizeName = value => String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  function historyForEvent(event) {
+    return showHistory.find(show=>show.date===event.show_date &&
+      (normalizeName(event.name).includes(show.key.startsWith('philo')?'philo':'trifrat')));
+  }
+  function publicEvents() {
+    const events=[...state.events];
+    for(const show of showHistory)if(!events.some(e=>historyForEvent(e)?.key===show.key))
+      events.push({id:show.key,name:show.name,show_date:show.date});
+    return events.sort((a,b)=>String(a.show_date||'9999').localeCompare(String(b.show_date||'9999')));
+  }
+  function publicSetlist(show) {
+    return `<details class="show-setlist"><summary>VIEW SETLIST · ${show.titles.length} SONGS</summary><ol>${show.titles.map(title=>`<li>${escapeHTML(title)}</li>`).join('')}</ol></details>`;
+  }
+  function historyImportButton(){
+    return '<button class="button secondary" data-action="import-show-history">IMPORT PHILO + TRIFRAT SHOWS & SETLISTS</button><p class="editor-help">Save the supplied 2026 shows, songs, setlists, and booking email to Supabase. Existing show details and songs are preserved.</p>';
+  }
+  let historyImportRunning=false;
+  async function importShowHistory(button){
+    if(!db||!state.member||historyImportRunning)return;
+    historyImportRunning=true;
+    button.disabled=true;
+    try {
+      // Re-read before importing so repeated imports reuse the same records.
+      const loaded=await Promise.all([loadEvents(),loadPrivate()]);
+      if(loaded.some(result=>result===false))throw Error('Could not read existing records');
+      for(const show of showHistory){
+        if(!state.events.some(e=>historyForEvent(e)?.key===show.key)){
+          const {data,error}=await db.from('events').insert({name:show.name,show_date:show.date,venue:'',city:'',show_time:null,ticket_url:null}).select('*').single();
+          if(error)throw error;state.events.push(data);
+        }
+        const name=`${show.name} — ${show.date}`;
+        let setlist=state.setlists.find(x=>x.name===name);
+        if(!setlist){const {data,error}=await db.from('setlists').insert({name}).select('*').single();if(error)throw error;setlist=data;state.setlists.push(data);}
+        for(let index=0;index<show.titles.length;index++){
+          const title=show.titles[index];
+          const aliases={valerie:['valarie'],santeria:['santaria','sanataria']};
+          const accepted=[normalizeName(title),...(aliases[normalizeName(title)]||[])];
+          let song=state.songs.find(x=>accepted.includes(normalizeName(x.title)));
+          if(!song){const {data,error}=await db.from('songs').insert({title,artist:'',tab_url:null,created_by:state.user.id}).select('*').single();if(error)throw error;song=data;state.songs.push(data);}
+          const existing=state.setlistSongs.find(x=>x.setlist_id===setlist.id&&x.song_id===song.id);
+          if(!existing){const row={setlist_id:setlist.id,song_id:song.id,position:index+1};const {error}=await db.from('setlist_songs').insert(row);if(error)throw error;state.setlistSongs.push(row);}
+        }
+      }
+      const {error}=await db.from('site_content').update({booking_email:'willaitchison2@gmail.com'}).eq('id',1);
+      if(error)throw error;
+      await Promise.all([loadEvents(),loadPrivate(),loadAbout()]);
+      notify('Shows, setlists, and booking email imported.');
+    }catch(error){notify('Import stopped: '+(error.message||String(error))+'. You can retry to complete missing records.',true);}
+    finally{historyImportRunning=false;if(button.isConnected)button.disabled=false;}
   }
   const aboutDefaults = {
     about_title: 'Meet the Ice Machine.',
     about_bio: 'Motel Ice Machine is a St. Louis band playing live music around town.',
     home_heading: 'GOOD MUSIC. QUESTIONABLE LODGING.',
     home_blurb: 'Motel Ice Machine is a band from St. Louis, Missouri. Loud guitars, familiar songs, and a good night out.',
-    booking_email: '', instagram_url: '', spotify_url: '', band_photo_path: '', members: []
+    booking_email: 'willaitchison2@gmail.com', instagram_url: '', spotify_url: '', band_photo_path: '', members: []
   };
-  const aboutContent = () => ({...aboutDefaults, ...(state.about || {})});
+  const aboutContent = () => {
+    const content={...aboutDefaults,...(state.about||{})};
+    if(!content.booking_email || content.booking_email.toLowerCase()==='aitchison@wustl.edu')content.booking_email='willaitchison2@gmail.com';
+    return content;
+  };
   const safeText = value => escapeHTML(value).replace(/\n/g, '<br>');
   function publicPhoto(path) {
     if (!db || !path || !/^about\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(path)) return '';
@@ -49,9 +112,9 @@
   }
   function homePage(){
     const a=aboutContent();
-    return `<section class="hero"><div class="neon-frame"><div class="neon-words"><span class="neon-first">Motel</span><span class="neon-second">Ice Machine</span></div></div><div class="hero-actions"><a class="button" href="#shows">UPCOMING SHOWS ↗</a></div></section><div class="ticker">✳ &nbsp; ST. LOUIS &nbsp; / &nbsp; LIVE MUSIC &nbsp; / &nbsp; MOTEL ICE MACHINE &nbsp; ✳</div><section class="section"><div class="section-eyebrow">01 / THE MARQUEE</div><h2>Upcoming shows.</h2><p>Dates, venues, and ticket information.</p>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><div class="section-eyebrow">02 / THE BAND</div><h2>${escapeHTML(a.home_heading)}</h2><p>${safeText(a.home_blurb)}</p><a class="button" href="#about">THE BAND →</a></div></section>`;
+    return `<section class="hero"><p class="hero-location">ST. LOUIS, MISSOURI · LIVE MUSIC</p><div class="neon-frame"><i class="sign-bolt bolt-top" aria-hidden="true"></i><i class="sign-bolt bolt-bottom" aria-hidden="true"></i><h1 class="neon-words" aria-label="Motel Ice Machine"><span class="neon-first">Motel</span><span class="neon-second">Ice Machine</span></h1></div><p class="hero-caption">Good tunes. Stay a while.</p><div class="hero-actions"><a class="button" href="#shows">UPCOMING SHOWS ↗</a></div></section><div class="ticker">✳ &nbsp; ST. LOUIS &nbsp; / &nbsp; LIVE MUSIC &nbsp; / &nbsp; MOTEL ICE MACHINE &nbsp; ✳</div><section class="section"><div class="section-eyebrow">01 / THE MARQUEE</div><h2>Upcoming shows.</h2><p>Dates, venues, and ticket information.</p>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><div class="section-eyebrow">02 / THE BAND</div><h2>${escapeHTML(a.home_heading)}</h2><p>${safeText(a.home_blurb)}</p><a class="button" href="#about">THE BAND →</a></div></section>`;
   }
-  function showsPage(){return `<section class="section"><div class="section-eyebrow">LIVE / THE MARQUEE</div><h1>Shows & tickets.</h1><p>Upcoming dates, venues, and ticket information.</p>${eventCards(false)}</section>`;}
+  function showsPage(){return `<section class="section"><div class="section-eyebrow">LIVE / THE MARQUEE</div><h1>Shows & tickets.</h1><p>Upcoming dates, venues, and ticket information.</p>${eventCards(false)}<div class="past-shows"><div class="section-eyebrow">THE GUEST BOOK / PREVIOUS DATES</div><h2>Past shows.</h2><p>A look back at where we’ve played.</p>${eventCards(false,true)}</div></section>`;}
   function aboutPage(){
     const a=aboutContent();const photo=publicPhoto(a.band_photo_path);
     const members=Array.isArray(a.members)?a.members:[];
@@ -64,14 +127,14 @@
   }
   function setlistTab(){
     const selected = state.setlists.find(s=>s.id===state.setId) || state.setlists[0];
-    if (!selected)return '<div class="empty">No setlists available.</div>';
+    if (!selected)return historyImportButton()+'<div class="empty">No setlists available.</div>';
     const entries = state.setlistSongs.filter(x=>x.setlist_id===selected.id).sort((a,b)=>a.position-b.position||a.song_id-b.song_id);
-    return `<div class="workhead"><div><h2>SETLIST BUILDER.</h2><p>Manage songs and their playing order.</p></div><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="set-tabs">${state.setlists.map(s=>`<button class="${s.id===selected.id?'active':''}" data-action="choose-setlist" data-id="${s.id}">${escapeHTML(s.name)}</button>`).join('')}</div><div class="workhead"><strong>${escapeHTML(selected.name)} · ${entries.length} SONGS</strong><button class="button secondary" data-action="add-to-setlist">+ ADD SONG</button></div>${entries.length?entries.map((entry,i)=>{const song=state.songs.find(s=>s.id===entry.song_id);if(!song)return '';return `<div class="set-row"><span class="position">${i+1}</span><div class="detail"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.artist)}</small><a href="${escapeHTML(linkForSong(song))}" target="_blank" rel="noopener noreferrer">TABS ↗</a></div><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="1" ${i===entries.length-1?'disabled':''}>↓</button><button class="small-button danger" data-action="remove-song" data-id="${song.id}">×</button></div>`}).join(''):'<div class="empty">This setlist is empty.</div>'}`;
+    return `${historyImportButton()}<div class="workhead"><div><h2>SETLIST BUILDER.</h2><p>Manage songs and their playing order.</p></div><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="set-tabs">${state.setlists.map(s=>`<button class="${s.id===selected.id?'active':''}" data-action="choose-setlist" data-id="${s.id}">${escapeHTML(s.name)}</button>`).join('')}</div><div class="workhead"><strong>${escapeHTML(selected.name)} · ${entries.length} SONGS</strong><button class="button secondary" data-action="add-to-setlist">+ ADD SONG</button></div>${entries.length?entries.map((entry,i)=>{const song=state.songs.find(s=>s.id===entry.song_id);if(!song)return '';return `<div class="set-row"><span class="position">${i+1}</span><div class="detail"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.artist)}</small><a href="${escapeHTML(linkForSong(song))}" target="_blank" rel="noopener noreferrer">TABS ↗</a></div><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="1" ${i===entries.length-1?'disabled':''}>↓</button><button class="small-button danger" data-action="remove-song" data-id="${song.id}">×</button></div>`}).join(''):'<div class="empty">This setlist is empty.</div>'}`;
   }
   function websiteTab(){
     const a=aboutContent();
     const photo=publicPhoto(a.band_photo_path);
-    return `<div class="workhead"><div><h2>WEBSITE EDITOR.</h2><p>Edit the public homepage and Meet the Band page. Changes appear on the live site.</p></div></div><form id="about-form" class="about-editor"><div class="editor-grid"><div><label class="form-field" for="about-title">ABOUT PAGE HEADING</label><input class="input" id="about-title" name="about_title" maxlength="120" required value="${escapeHTML(a.about_title)}"></div><div><label class="form-field" for="about-email">BOOKING EMAIL</label><input class="input" id="about-email" name="booking_email" type="email" value="${escapeHTML(a.booking_email)}"></div></div><label class="form-field" for="about-bio">ABOUT / BAND BIO</label><textarea class="input editor-textarea" id="about-bio" name="about_bio" rows="6" maxlength="10000" required>${escapeHTML(a.about_bio)}</textarea><div class="editor-grid"><div><label class="form-field" for="about-home-heading">HOMEPAGE ABOUT HEADING</label><input class="input" id="about-home-heading" name="home_heading" maxlength="160" required value="${escapeHTML(a.home_heading)}"></div><div><label class="form-field" for="about-home-blurb">HOMEPAGE SHORT BIO</label><textarea class="input editor-textarea" id="about-home-blurb" name="home_blurb" rows="3" maxlength="1000" required>${escapeHTML(a.home_blurb)}</textarea></div></div><div class="editor-grid"><div><label class="form-field" for="about-instagram">INSTAGRAM URL</label><input class="input" id="about-instagram" name="instagram_url" type="url" placeholder="https://instagram.com/..." value="${escapeHTML(a.instagram_url)}"></div><div><label class="form-field" for="about-spotify">SPOTIFY URL</label><input class="input" id="about-spotify" name="spotify_url" type="url" placeholder="https://open.spotify.com/..." value="${escapeHTML(a.spotify_url)}"></div></div><label class="form-field" for="about-photo">BAND PHOTO (JPG, PNG OR WEBP; MAX 5 MB)</label>${photo?`<img class="editor-photo" src="${escapeHTML(photo)}" alt="Current band photo">`:''}<input class="input" type="file" id="about-photo" name="photo" accept="image/jpeg,image/png,image/webp"><label class="editor-check"><input type="checkbox" name="remove_photo" value="yes"> Remove current band photo</label><label class="form-field" for="about-members">BAND MEMBER PROFILES — ONE PER LINE</label><p class="editor-help">Format: Name | Instrument | Short bio | Optional image URL. Leave the image URL blank if you don't have one.</p><textarea class="input editor-textarea" id="about-members" name="members_text" rows="6" maxlength="14000" placeholder="Sam | Guitar | Loves loud amplifiers | https://example.com/photo.jpg">${escapeHTML((Array.isArray(a.members)?a.members:[]).map(m=>[m.name||'',m.instrument||'',m.bio||'',m.photo_url||''].join(' | ')).join('\n'))}</textarea><div id="about-error" class="form-error" role="alert" aria-live="polite"></div><div class="editor-actions"><button class="button" type="submit">PUBLISH CHANGES →</button><a class="button secondary" href="#about">VIEW PUBLIC PAGE ↗</a></div></form>`;
+    return `<div class="workhead"><div><h2>WEBSITE EDITOR.</h2><p>Edit the public homepage and Meet the Band page. Changes appear on the live site.</p></div></div><form id="about-form" class="about-editor"><div class="editor-grid"><div><label class="form-field" for="about-title">ABOUT PAGE HEADING</label><input class="input" id="about-title" name="about_title" maxlength="120" value="${escapeHTML(a.about_title)}"></div><div><label class="form-field" for="about-email">BOOKING EMAIL</label><input class="input" id="about-email" name="booking_email" type="email" value="${escapeHTML(a.booking_email)}"></div></div><label class="form-field" for="about-bio">ABOUT / BAND BIO</label><textarea class="input editor-textarea" id="about-bio" name="about_bio" rows="6" maxlength="10000">${escapeHTML(a.about_bio)}</textarea><div class="editor-grid"><div><label class="form-field" for="about-home-heading">HOMEPAGE ABOUT HEADING</label><input class="input" id="about-home-heading" name="home_heading" maxlength="160" value="${escapeHTML(a.home_heading)}"></div><div><label class="form-field" for="about-home-blurb">HOMEPAGE SHORT BIO</label><textarea class="input editor-textarea" id="about-home-blurb" name="home_blurb" rows="3" maxlength="1000">${escapeHTML(a.home_blurb)}</textarea></div></div><div class="editor-grid"><div><label class="form-field" for="about-instagram">INSTAGRAM URL</label><input class="input" id="about-instagram" name="instagram_url" type="url" placeholder="https://instagram.com/..." value="${escapeHTML(a.instagram_url)}"></div><div><label class="form-field" for="about-spotify">SPOTIFY URL</label><input class="input" id="about-spotify" name="spotify_url" type="url" placeholder="https://open.spotify.com/..." value="${escapeHTML(a.spotify_url)}"></div></div><label class="form-field" for="about-photo">BAND PHOTO (JPG, PNG OR WEBP; MAX 5 MB)</label>${photo?`<img class="editor-photo" src="${escapeHTML(photo)}" alt="Current band photo">`:''}<input class="input" type="file" id="about-photo" name="photo" accept="image/jpeg,image/png,image/webp"><label class="editor-check"><input type="checkbox" name="remove_photo" value="yes"> Remove current band photo</label><label class="form-field" for="about-members">BAND MEMBER PROFILES — ONE PER LINE</label><p class="editor-help">Format: Name | Instrument | Short bio | Optional image URL. Leave the image URL blank if you don't have one.</p><textarea class="input editor-textarea" id="about-members" name="members_text" rows="6" maxlength="14000" placeholder="Sam | Guitar | Loves loud amplifiers | https://example.com/photo.jpg">${escapeHTML((Array.isArray(a.members)?a.members:[]).map(m=>[m.name||'',m.instrument||'',m.bio||'',m.photo_url||''].join(' | ')).join('\n'))}</textarea><div id="about-error" class="form-error" role="alert" aria-live="polite"></div><div class="editor-actions"><button class="button" type="submit">PUBLISH CHANGES →</button><a class="button secondary" href="#about">VIEW PUBLIC PAGE ↗</a></div></form>`;
   }
   async function saveAbout(formElement){
     if(!db||!state.member)return;
@@ -87,7 +150,6 @@
         return {name:p[0],instrument:p[1]||'',bio:p[2]||'',photo_url:p[3]||''};
       });
       const row={id:1,about_title:String(f.get('about_title')||'').trim(),about_bio:String(f.get('about_bio')||'').trim(),home_heading:String(f.get('home_heading')||'').trim(),home_blurb:String(f.get('home_blurb')||'').trim(),booking_email:String(f.get('booking_email')||'').trim(),instagram_url:String(f.get('instagram_url')||'').trim(),spotify_url:String(f.get('spotify_url')||'').trim(),members,band_photo_path:aboutContent().band_photo_path||''};
-      if(!row.about_title||!row.about_bio||!row.home_heading||!row.home_blurb)throw Error('Please fill in the headings and descriptions.');
       for(const key of ['instagram_url','spotify_url'])if(row[key]&&!validUrl(row[key]))throw Error('Please enter a valid http(s) URL for '+key+'.');
       if(f.get('remove_photo'))row.band_photo_path='';
       const photo=f.get('photo');
@@ -111,6 +173,7 @@
   function render(){
     const page=getPage();$('view').innerHTML=page==='home'?homePage():page==='shows'?showsPage():page==='about'?aboutPage():page==='band'?(state.member?workspace():loginPage()):homePage();
     updateMenu();
+    document.querySelectorAll('.desktop-nav a, .site-menu a').forEach(a=>{if(a.hash==='#'+page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   }
   async function loadAbout(){
     if(!db)return;
@@ -118,7 +181,7 @@
     if(error){notify('Could not load About content: '+error.message,true);return;}
     state.about=data||null;render();
   }
-  async function loadEvents(){if(!db)return;const {data,error}=await db.from('events').select('*').order('show_date',{ascending:true});if(error){notify('Could not load shows: '+error.message,true);return;}state.events=data||[];render();}
+  async function loadEvents(){if(!db){state.eventsLoaded=true;render();return;}const {data,error}=await db.from('events').select('*').order('show_date',{ascending:true});if(error){state.eventsError=true;render();notify('Could not load shows: '+error.message,true);return false;}state.eventsError=false;state.events=data||[];state.eventsLoaded=true;render();return true;}
   async function loadPrivate(){if(!db||!state.member)return;const [s,v,sl,ss]=await Promise.all([
     db.from('songs').select('*').order('created_at',{ascending:false}),
     db.from('votes').select('song_id,user_id'),
@@ -126,10 +189,11 @@
     db.from('setlist_songs').select('*').order('position',{ascending:true})
   ]);
     const failed=[s,v,sl,ss].find(r=>r.error);
-    if(failed){notify('Could not load band data: '+failed.error.message,true);return;}
+    if(failed){notify('Could not load band data: '+failed.error.message,true);return false;}
     state.songs=s.data||[];state.votes=v.data||[];state.setlists=sl.data||[];state.setlistSongs=ss.data||[];
     if(!state.setlists.some(x=>x.id===state.setId))state.setId=state.setlists[0]?.id??null;
     render();
+    return true;
   }
   async function verifyMember(){
     if(!db)return;
@@ -194,11 +258,11 @@
       try {const done=await onSubmit(new FormData(e.target));if(done!==false){shade.remove();await Promise.all([loadEvents(),loadPrivate()]);}}catch(err){shade.querySelector('#modal-error').textContent=err.message||String(err);}finally{btn.disabled=false;}
     });
   }
-  const field=(label,name,value='',type='text',required=true)=>`<label class="form-field" for="field-${name}">${label}</label><input class="input" id="field-${name}" name="${name}" type="${type}" value="${escapeHTML(value)}" ${required?'required':''} ${type==='text'?'maxlength="160"':''}>`;
+  const field=(label,name,value='',type='text',required=(name==='name'||name==='title'))=>`<label class="form-field" for="field-${name}">${label}</label><input class="input" id="field-${name}" name="${name}" type="${type}" value="${escapeHTML(value)}" ${required?'required':''} ${type==='text'?'maxlength="160"':''}>`;
   function editEvent(id){
     const e=id?state.events.find(x=>x.id===id):null;
     modalForm({title:e?'EDIT SHOW':'ADD SHOW',fields:field('EVENT NAME','name',e?.name||'')+field('DATE','show_date',e?.show_date||'','date')+field('VENUE','venue',e?.venue||'')+field('CITY','city',e?.city||'St. Louis, MO')+field('TIME (OPTIONAL)','show_time',e?.show_time||'','text',false)+field('TICKET URL (OPTIONAL)','ticket_url',e?.ticket_url||'','url',false),onSubmit:async data=>{
-      const row={name:String(data.get('name')).trim(),show_date:String(data.get('show_date')),venue:String(data.get('venue')).trim(),city:String(data.get('city')).trim(),show_time:String(data.get('show_time')||'').trim()||null,ticket_url:String(data.get('ticket_url')||'').trim()||null};
+      const row={name:String(data.get('name')).trim(),show_date:String(data.get('show_date')||'')||null,venue:String(data.get('venue')).trim(),city:String(data.get('city')).trim(),show_time:String(data.get('show_time')||'').trim()||null,ticket_url:String(data.get('ticket_url')||'').trim()||null};
       if(row.ticket_url&&!validUrl(row.ticket_url))throw Error('Provide a valid http(s) ticket URL.');
       const result=e?await db.from('events').update(row).eq('id',e.id):await db.from('events').insert(row);
       if(result.error)throw result.error;notify(e?'Show updated.':'Show published.');
@@ -222,6 +286,7 @@
   async function action(button){
     const kind=button.dataset.action,id=Number(button.dataset.id);
     if(!state.member&&kind!=='refresh')return;
+    if(kind==='import-show-history'){await importShowHistory(button);return;}
     if(kind==='tab'){state.tab=button.dataset.tab;await loadPrivate();return;}
     if(kind==='refresh'){await Promise.all([loadEvents(),loadPrivate()]);notify('Data refreshed.');return;}
     if(kind==='logout'){await db.auth.signOut();state.member=false;state.user=null;location.hash='#home';notify('Signed out.');return;}
@@ -263,6 +328,7 @@
   window.addEventListener('hashchange',async()=>{render();if(getPage()==='band'&&state.member)await loadPrivate();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&db)void loadEvents();});
   $('year').textContent=new Date().getFullYear();
+  if(!db)state.eventsLoaded=true;
   render();
   if(db){
     void verifyMember();void loadEvents();void loadAbout();
