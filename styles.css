@@ -34,3 +34,5 @@
 /* Public, explicit snapshots; no access to the private song board. */
 .show-setlist{margin:16px 0 8px;border-top:1px solid #536874;padding-top:12px}.show-setlist summary{cursor:pointer;color:var(--gold);font:700 13px 'Barlow Condensed',sans-serif;letter-spacing:1.2px}.show-setlist summary:focus-visible{outline:2px solid var(--teal);outline-offset:4px}.show-setlist ol{padding-left:25px;line-height:1.9;font-size:14px;color:var(--ink);columns:2;column-gap:30px}.show-setlist li{break-inside:avoid;padding-left:4px}.show-setlist li::marker{color:var(--gold)}
 @media(max-width:680px){.show-setlist ol{columns:1}}
+
+.event-info a.ticket-button{display:inline-block;background:var(--gold);color:#12232e;text-decoration:none;font-size:13px;padding:10px 17px;margin-top:8px;border:1px solid #f4cea8}.event-info a.ticket-button:hover{filter:brightness(1.09)}
