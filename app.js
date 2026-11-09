@@ -6,7 +6,7 @@
     typeof cfg.supabaseKey === 'string' && !cfg.supabaseKey.startsWith('PASTE_');
   const db = configured && window.supabase ? window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey) : null;
   const $ = id => document.getElementById(id);
-  const state = { member: false, user: null, events: [], songs: [], votes: [], setlists: [], setlistSongs: [], tab: 'events', setId: null };
+  const state = { member: false, user: null, events: [], songs: [], votes: [], setlists: [], setlistSongs: [], tab: 'events', setId: null, about: null };
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const validUrl = url => { try { const parsed = new URL(url); return ['https:', 'http:'].includes(parsed.protocol) ? parsed.href : ''; } catch { return ''; } };
   const linkForSong = s => validUrl(s.tab_url) || `https://www.ultimate-guitar.com/search.php?search=${encodeURIComponent(`${s.title} ${s.artist}`)}`;
@@ -30,9 +30,33 @@
       return `<article class="event-card"><div class="event-date"><small>${date.month}</small><b>${date.day}</b></div><div class="event-info"><h3>${escapeHTML(e.name)}</h3><p>${escapeHTML(e.venue)} · ${escapeHTML(e.city)}${e.show_time?' · '+escapeHTML(e.show_time):''}</p>${link?`<a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">TICKETS / INFO ↗</a>`:''}</div>${manage?`<div class="event-actions"><button class="small-button" data-action="edit-event" data-id="${e.id}">EDIT</button><button class="small-button danger" data-action="delete-event" data-id="${e.id}">DELETE</button></div>`:''}</article>`;
     }).join('');
   }
-  function homePage(){return `<section class="hero"><div class="neon-frame"><div class="neon-words"><span class="neon-first">Motel</span><span class="neon-second">Ice Machine</span></div></div><div class="hero-actions"><a class="button" href="#shows">UPCOMING SHOWS ↗</a></div></section><div class="ticker">✳ &nbsp; ST. LOUIS &nbsp; / &nbsp; LIVE MUSIC &nbsp; / &nbsp; MOTEL ICE MACHINE &nbsp; ✳</div><section class="section"><div class="section-eyebrow">01 / THE MARQUEE</div><h2>Upcoming shows.</h2><p>Dates, venues, and ticket information.</p>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><div class="section-eyebrow">02 / THE BAND</div><h2>GOOD MUSIC.<br>QUESTIONABLE LODGING.</h2><p>Motel Ice Machine is a band from St. Louis, Missouri. Loud guitars, familiar songs, and a good night out.</p><a class="button" href="#about">THE BAND →</a></div></section>`;}
+  const aboutDefaults = {
+    about_title: 'Meet the Ice Machine.',
+    about_bio: 'Motel Ice Machine is a St. Louis band playing live music around town.',
+    home_heading: 'GOOD MUSIC. QUESTIONABLE LODGING.',
+    home_blurb: 'Motel Ice Machine is a band from St. Louis, Missouri. Loud guitars, familiar songs, and a good night out.',
+    booking_email: '', instagram_url: '', spotify_url: '', band_photo_path: '', members: []
+  };
+  const aboutContent = () => ({...aboutDefaults, ...(state.about || {})});
+  const safeText = value => escapeHTML(value).replace(/\n/g, '<br>');
+  function publicPhoto(path) {
+    if (!db || !path || !/^about\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(path)) return '';
+    return db.storage.from('band-photos').getPublicUrl(path).data.publicUrl;
+  }
+  function socialLink(url, title) {
+    const href=validUrl(url);
+    return href?`<a class="button secondary" href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer">${title} ↗</a>`:'';
+  }
+  function homePage(){
+    const a=aboutContent();
+    return `<section class="hero"><div class="neon-frame"><div class="neon-words"><span class="neon-first">Motel</span><span class="neon-second">Ice Machine</span></div></div><div class="hero-actions"><a class="button" href="#shows">UPCOMING SHOWS ↗</a></div></section><div class="ticker">✳ &nbsp; ST. LOUIS &nbsp; / &nbsp; LIVE MUSIC &nbsp; / &nbsp; MOTEL ICE MACHINE &nbsp; ✳</div><section class="section"><div class="section-eyebrow">01 / THE MARQUEE</div><h2>Upcoming shows.</h2><p>Dates, venues, and ticket information.</p>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><div class="section-eyebrow">02 / THE BAND</div><h2>${escapeHTML(a.home_heading)}</h2><p>${safeText(a.home_blurb)}</p><a class="button" href="#about">THE BAND →</a></div></section>`;
+  }
   function showsPage(){return `<section class="section"><div class="section-eyebrow">LIVE / THE MARQUEE</div><h1>Shows & tickets.</h1><p>Upcoming dates, venues, and ticket information.</p>${eventCards(false)}</section>`;}
-  function aboutPage(){return `<section class="section"><div class="section-eyebrow">ROOM 101 / ABOUT</div><h1>Meet the Ice Machine.</h1><p>Motel Ice Machine is a St. Louis band playing live music around town.</p><div class="empty" style="text-align:left;max-width:590px"><h3>Booking & contact</h3><p>Add your band's email address, social handles, photographs, and official bio here in a future update.</p></div></section>`;}
+  function aboutPage(){
+    const a=aboutContent();const photo=publicPhoto(a.band_photo_path);
+    const members=Array.isArray(a.members)?a.members:[];
+    return `<section class="section about-page"><div class="section-eyebrow">ROOM 101 / ABOUT</div><h1>${escapeHTML(a.about_title)}</h1>${photo?`<img class="about-hero-photo" src="${escapeHTML(photo)}" alt="Motel Ice Machine band photograph" loading="lazy">`:''}<div class="about-bio">${safeText(a.about_bio)}</div>${members.length?`<div class="members-heading"><h2>THE BAND.</h2></div><div class="member-grid">${members.map(m=>`<article class="member-card">${m.photo_url&&validUrl(m.photo_url)?`<img src="${escapeHTML(validUrl(m.photo_url))}" loading="lazy" alt="${escapeHTML(m.name||'Band member')}">`:''}<h3>${escapeHTML(m.name||'')}</h3><strong>${escapeHTML(m.instrument||'')}</strong><p>${safeText(m.bio||'')}</p></article>`).join('')}</div>`:''}<div class="about-contact"><h2>BOOKING & CONTACT</h2>${a.booking_email?`<p><a href="mailto:${escapeHTML(a.booking_email)}">${escapeHTML(a.booking_email)}</a></p>`:'<p>Contact information coming soon.</p>'}<div class="about-socials">${socialLink(a.instagram_url,'INSTAGRAM')}${socialLink(a.spotify_url,'SPOTIFY')}</div></div></section>`;
+  }
   function loginPage(){return `<section class="section"><div class="login-card"><div class="section-eyebrow">MEMBERS ONLY</div><h1>Band check-in.</h1><p>Sign in using your band member email and password.</p>${!db?'<p class="form-error">Site not configured. Add your Supabase URL and publishable key to config.js first.</p>':''}<form id="login-form"><label class="form-field" for="login-email">EMAIL</label><input class="input" id="login-email" name="email" type="email" autocomplete="username" required><label class="form-field" for="login-password">PASSWORD</label><input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required><div id="login-error" class="form-error" role="alert" aria-live="polite"></div><button class="button" type="submit" ${!db?'disabled':''}>CHECK IN →</button></form></div></section>`;}
   function songsTab(){
     let rows = state.songs.map(song=>({song,votes:state.votes.filter(v=>v.song_id===song.id),voted:state.votes.some(v=>v.song_id===song.id&&v.user_id===state.user?.id)})).sort((a,b)=>b.votes.length-a.votes.length);
@@ -44,10 +68,55 @@
     const entries = state.setlistSongs.filter(x=>x.setlist_id===selected.id).sort((a,b)=>a.position-b.position||a.song_id-b.song_id);
     return `<div class="workhead"><div><h2>SETLIST BUILDER.</h2><p>Manage songs and their playing order.</p></div><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="set-tabs">${state.setlists.map(s=>`<button class="${s.id===selected.id?'active':''}" data-action="choose-setlist" data-id="${s.id}">${escapeHTML(s.name)}</button>`).join('')}</div><div class="workhead"><strong>${escapeHTML(selected.name)} · ${entries.length} SONGS</strong><button class="button secondary" data-action="add-to-setlist">+ ADD SONG</button></div>${entries.length?entries.map((entry,i)=>{const song=state.songs.find(s=>s.id===entry.song_id);if(!song)return '';return `<div class="set-row"><span class="position">${i+1}</span><div class="detail"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.artist)}</small><a href="${escapeHTML(linkForSong(song))}" target="_blank" rel="noopener noreferrer">TABS ↗</a></div><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="1" ${i===entries.length-1?'disabled':''}>↓</button><button class="small-button danger" data-action="remove-song" data-id="${song.id}">×</button></div>`}).join(''):'<div class="empty">This setlist is empty.</div>'}`;
   }
-  function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE.</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER.</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():setlistTab()}</section>`;}
+  function websiteTab(){
+    const a=aboutContent();
+    const photo=publicPhoto(a.band_photo_path);
+    return `<div class="workhead"><div><h2>WEBSITE EDITOR.</h2><p>Edit the public homepage and Meet the Band page. Changes appear on the live site.</p></div></div><form id="about-form" class="about-editor"><div class="editor-grid"><div><label class="form-field" for="about-title">ABOUT PAGE HEADING</label><input class="input" id="about-title" name="about_title" maxlength="120" required value="${escapeHTML(a.about_title)}"></div><div><label class="form-field" for="about-email">BOOKING EMAIL</label><input class="input" id="about-email" name="booking_email" type="email" value="${escapeHTML(a.booking_email)}"></div></div><label class="form-field" for="about-bio">ABOUT / BAND BIO</label><textarea class="input editor-textarea" id="about-bio" name="about_bio" rows="6" maxlength="10000" required>${escapeHTML(a.about_bio)}</textarea><div class="editor-grid"><div><label class="form-field" for="about-home-heading">HOMEPAGE ABOUT HEADING</label><input class="input" id="about-home-heading" name="home_heading" maxlength="160" required value="${escapeHTML(a.home_heading)}"></div><div><label class="form-field" for="about-home-blurb">HOMEPAGE SHORT BIO</label><textarea class="input editor-textarea" id="about-home-blurb" name="home_blurb" rows="3" maxlength="1000" required>${escapeHTML(a.home_blurb)}</textarea></div></div><div class="editor-grid"><div><label class="form-field" for="about-instagram">INSTAGRAM URL</label><input class="input" id="about-instagram" name="instagram_url" type="url" placeholder="https://instagram.com/..." value="${escapeHTML(a.instagram_url)}"></div><div><label class="form-field" for="about-spotify">SPOTIFY URL</label><input class="input" id="about-spotify" name="spotify_url" type="url" placeholder="https://open.spotify.com/..." value="${escapeHTML(a.spotify_url)}"></div></div><label class="form-field" for="about-photo">BAND PHOTO (JPG, PNG OR WEBP; MAX 5 MB)</label>${photo?`<img class="editor-photo" src="${escapeHTML(photo)}" alt="Current band photo">`:''}<input class="input" type="file" id="about-photo" name="photo" accept="image/jpeg,image/png,image/webp"><label class="editor-check"><input type="checkbox" name="remove_photo" value="yes"> Remove current band photo</label><label class="form-field" for="about-members">BAND MEMBER PROFILES — ONE PER LINE</label><p class="editor-help">Format: Name | Instrument | Short bio | Optional image URL. Leave the image URL blank if you don't have one.</p><textarea class="input editor-textarea" id="about-members" name="members_text" rows="6" maxlength="14000" placeholder="Sam | Guitar | Loves loud amplifiers | https://example.com/photo.jpg">${escapeHTML((Array.isArray(a.members)?a.members:[]).map(m=>[m.name||'',m.instrument||'',m.bio||'',m.photo_url||''].join(' | ')).join('\n'))}</textarea><div id="about-error" class="form-error" role="alert" aria-live="polite"></div><div class="editor-actions"><button class="button" type="submit">PUBLISH CHANGES →</button><a class="button secondary" href="#about">VIEW PUBLIC PAGE ↗</a></div></form>`;
+  }
+  async function saveAbout(formElement){
+    if(!db||!state.member)return;
+    const submit=formElement.querySelector('button[type="submit"]');
+    const errorElement=formElement.querySelector('#about-error');
+    submit.disabled=true;submit.textContent='PUBLISHING…';errorElement.textContent='';
+    try{
+      const f=new FormData(formElement);
+      const members=String(f.get('members_text')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map((line,i)=>{
+        const p=line.split('|').map(x=>x.trim());
+        if(p.length>4||!p[0])throw Error('Check member profile line '+(i+1)+'. Use: Name | Instrument | Bio | Optional URL');
+        if(p[3]&&!validUrl(p[3]))throw Error('Invalid member photo URL on line '+(i+1));
+        return {name:p[0],instrument:p[1]||'',bio:p[2]||'',photo_url:p[3]||''};
+      });
+      const row={id:1,about_title:String(f.get('about_title')||'').trim(),about_bio:String(f.get('about_bio')||'').trim(),home_heading:String(f.get('home_heading')||'').trim(),home_blurb:String(f.get('home_blurb')||'').trim(),booking_email:String(f.get('booking_email')||'').trim(),instagram_url:String(f.get('instagram_url')||'').trim(),spotify_url:String(f.get('spotify_url')||'').trim(),members,band_photo_path:aboutContent().band_photo_path||''};
+      if(!row.about_title||!row.about_bio||!row.home_heading||!row.home_blurb)throw Error('Please fill in the headings and descriptions.');
+      for(const key of ['instagram_url','spotify_url'])if(row[key]&&!validUrl(row[key]))throw Error('Please enter a valid http(s) URL for '+key+'.');
+      if(f.get('remove_photo'))row.band_photo_path='';
+      const photo=f.get('photo');
+      if(photo instanceof File&&photo.size>0){
+        if(photo.size>5*1024*1024)throw Error('Photo must be smaller than 5 MB.');
+        const extensions={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+        const ext=extensions[photo.type];if(!ext)throw Error('Upload a JPG, PNG, or WebP photo.');
+        const path='about/'+crypto.randomUUID()+'.'+ext;
+        const upload=await db.storage.from('band-photos').upload(path,photo,{contentType:photo.type,upsert:false});
+        if(upload.error)throw Error('Photo upload failed: '+upload.error.message);
+        row.band_photo_path=path;
+      }
+      const {error}=await db.from('site_content').upsert(row,{onConflict:'id'});
+      if(error)throw error;
+      state.about=row;render();notify('About page published successfully.');
+    }catch(error){errorElement.textContent=error.message||String(error);notify(error.message||String(error),true)}finally{
+      if(submit.isConnected){submit.disabled=false;submit.textContent='PUBLISH CHANGES →';}
+    }
+  }
+  function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE.</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER.</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
   function render(){
     const page=getPage();$('view').innerHTML=page==='home'?homePage():page==='shows'?showsPage():page==='about'?aboutPage():page==='band'?(state.member?workspace():loginPage()):homePage();
     updateMenu();
+  }
+  async function loadAbout(){
+    if(!db)return;
+    const {data,error}=await db.from('site_content').select('*').eq('id',1).maybeSingle();
+    if(error){notify('Could not load About content: '+error.message,true);return;}
+    state.about=data||null;render();
   }
   async function loadEvents(){if(!db)return;const {data,error}=await db.from('events').select('*').order('show_date',{ascending:true});if(error){notify('Could not load shows: '+error.message,true);return;}state.events=data||[];render();}
   async function loadPrivate(){if(!db||!state.member)return;const [s,v,sl,ss]=await Promise.all([
@@ -65,28 +134,54 @@
   async function verifyMember(){
     if(!db)return;
     const {data:{session},error}=await db.auth.getSession();
-    if(error||!session){state.member=false;state.user=null;render();return;}
+    if(error||!session){state.member=false;state.user=null;return;}
     const {data, error:memberErr}=await db.from('band_members').select('user_id').eq('user_id',session.user.id).maybeSingle();
     state.user=session.user;state.member=!memberErr&&!!data;render();
     if(state.member)await loadPrivate();
   }
   async function login(event){
-    event.preventDefault();if(!db)return;
-    const submit = event.target.querySelector('[type="submit"]');
-    const errorElement=$('login-error');errorElement.textContent='';
-    
-    const formElement = event.target.closest('form');
-    if (!formElement) {
-      console.error('Login failed: HTML form not found.');
+    event.preventDefault();
+    const formElement=event.target;
+    const submit=formElement.querySelector('[type="submit"]');
+    const errorElement=formElement.querySelector('#login-error');
+    if(!db){
+      if(errorElement)errorElement.textContent='Supabase is not configured. Check config.js for the project URL and publishable key.';
       return;
     }
-    const form = new FormData(formElement);
-
-    const {data,error}=await db.auth.signInWithPassword({email:String(form.get('email')).trim(),password:String(form.get('password'))});
-    if(error){errorElement.textContent=/invalid login credentials|invalid credentials/i.test(error.message)?'Incorrect email or password. Please try again.':'Could not sign in: '+error.message;submit.disabled=false;return;}
-    const {data:member,error:memberErr}=await db.from('band_members').select('user_id').eq('user_id',data.user.id).maybeSingle();
-    if(memberErr||!member){await db.auth.signOut();errorElement.textContent='This account is not approved for band access.';submit.disabled=false;return;}
-    state.user=data.user;state.member=true;state.tab='events';render();await loadPrivate();notify('Signed in to the band workspace.');
+    const form=new FormData(formElement);
+    const email=String(form.get('email')||'').trim();
+    const password=String(form.get('password')||'');
+    submit.disabled=true;
+    submit.textContent='CHECKING…';
+    if(errorElement)errorElement.textContent='';
+    try{
+      const {data,error}=await db.auth.signInWithPassword({email,password});
+      if(error){
+        throw new Error(/invalid login credentials|invalid credentials/i.test(error.message)
+          ? 'Incorrect email or password. Please try again.'
+          : 'Could not sign in: '+error.message);
+      }
+      if(!data?.user)throw new Error('No account information was returned. Please try again.');
+      const {data:member,error:memberErr}=await db.from('band_members').select('user_id').eq('user_id',data.user.id).maybeSingle();
+      if(memberErr)throw new Error('Could not verify band access: '+memberErr.message);
+      if(!member){
+        await db.auth.signOut();
+        throw new Error('This account is not approved for band access. Add its user ID to band_members in Supabase.');
+      }
+      state.user=data.user;
+      state.member=true;
+      state.tab='events';
+      render();
+      await loadPrivate();
+      notify('Signed in to the band workspace.');
+    }catch(err){
+      const message=err?.message||'Login failed. Check your connection and try again.';
+      const visibleError=document.getElementById('login-error');
+      if(visibleError)visibleError.textContent=message;
+      else notify(message,true);
+    }finally{
+      if(submit.isConnected){submit.disabled=false;submit.textContent='CHECK IN →';}
+    }
   }
   function modalForm({title,fields,submitLabel='SAVE',onSubmit}){
     document.querySelector('.modal-shade')?.remove();
@@ -164,13 +259,14 @@
     if(e.target.closest('.site-menu a')){$('site-menu').hidden=true;$('menu-button').setAttribute('aria-expanded','false');}
     const btn=e.target.closest('button[data-action]');if(btn)void action(btn);
   });
-  document.addEventListener('submit',e=>{if(e.target.id==='login-form')void login(e);});
+  document.addEventListener('submit',e=>{if(e.target.id==='login-form'){void login(e);}else if(e.target.id==='about-form'){e.preventDefault();void saveAbout(e.target);}});
   window.addEventListener('hashchange',async()=>{render();if(getPage()==='band'&&state.member)await loadPrivate();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&db)void loadEvents();});
   $('year').textContent=new Date().getFullYear();
   render();
   if(db){
-    void verifyMember();void loadEvents();
+    void verifyMember();void loadEvents();void loadAbout();
     db.channel('motel-public-events').on('postgres_changes',{event:'*',schema:'public',table:'events'},()=>{void loadEvents();}).subscribe();
+    db.channel('motel-public-about').on('postgres_changes',{event:'*',schema:'public',table:'site_content'},()=>{void loadAbout();}).subscribe();
   }
 })();
