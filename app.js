@@ -72,9 +72,9 @@
   }
   async function login(event){
     event.preventDefault();if(!db)return;
-    const submit=event.currentTarget.querySelector('[type="submit"]');submit.disabled=true;
+    const submit = event.target.querySelector('[type="submit"]');
     const errorElement=$('login-error');errorElement.textContent='';
-    const form=new FormData(event.currentTarget);
+    const form = new FormData(event.target);
     const {data,error}=await db.auth.signInWithPassword({email:String(form.get('email')).trim(),password:String(form.get('password'))});
     if(error){errorElement.textContent=/invalid login credentials|invalid credentials/i.test(error.message)?'Incorrect email or password. Please try again.':'Could not sign in: '+error.message;submit.disabled=false;return;}
     const {data:member,error:memberErr}=await db.from('band_members').select('user_id').eq('user_id',data.user.id).maybeSingle();
