@@ -233,7 +233,7 @@
   }
   function newSong(){modalForm({title:'SUGGEST A SONG',fields:field('SONG TITLE','title')+field('ARTIST','artist')+field('ULTIMATE GUITAR URL (OPTIONAL)','tab_url','','url',false),onSubmit:async form=>{
     const url=String(form.get('tab_url')||'').trim();if(url&&!validUrl(url))throw Error('Provide a valid http(s) link.');
-    const {error}=await db.from('songs').insert({title:String(form.get('title')).trim(),artist:String(form.get('artist')).trim(),tab_url:url||null,created_by:state.user.id});if(error)throw error;notify('Song suggested.');
+    const {error}=await db.from('songs').insert({title:String(form.get('title')).trim(),artist:String(form.get('artist')||'').trim()||'Not specified',tab_url:url||null,created_by:state.user.id});if(error)throw error;notify('Song suggested.');
   }});}
   function newSetlist(){modalForm({title:'NEW SETLIST',fields:field('SETLIST NAME','name'),onSubmit:async form=>{
     const {data,error}=await db.from('setlists').insert({name:String(form.get('name')).trim()}).select('id').single();if(error)throw error;state.setId=data.id;notify('Setlist created.');
@@ -249,8 +249,8 @@
   function selectedSetlist(){return state.setlists.find(s=>s.id===state.setId)||state.setlists[0];}
   const songIdentity = value => String(value||'').trim().toLocaleLowerCase().replace(/\s+/g,' ');
   function parseSongImport(text){
-    const titles=String(text||'').split(',').map(x=>x.trim()).filter(Boolean);
-    if(!titles.length)throw Error('Enter at least one song title, separated by commas.');
+    const titles=String(text||'').split(/[,\r\n]+/).map(x=>x.trim()).filter(Boolean);
+    if(!titles.length)throw Error('Enter at least one song title, separated by commas or line breaks.');
     if(titles.length>200)throw Error('Import up to 200 songs at a time.');
     if(titles.some(x=>x.length>160))throw Error('Song titles must be 160 characters or fewer.');
     return [...new Map(titles.map(title=>[songIdentity(title),title])).values()];
@@ -266,7 +266,7 @@
       const title=entry.title.trim(),artist=(entry.artist||'').trim();
       let song=state.songs.find(s=>songIdentity(s.title)===songIdentity(title) && (!artist||songIdentity(s.artist)===songIdentity(artist)));
       if(!song){
-        const {data,error}=await db.from('songs').insert({title,artist,tab_url:entry.tab_url||null,created_by:state.user.id}).select('*').single();
+        const {data,error}=await db.from('songs').insert({title,artist:artist||'Not specified',tab_url:entry.tab_url||null,created_by:state.user.id}).select('*').single();
         if(error)throw Error('Could not save '+title+': '+error.message);song=data;state.songs.push(data);
       }
       if(state.setlistSongs.some(s=>s.setlist_id===setId&&s.song_id===song.id)){skipped++;continue;}
@@ -290,7 +290,7 @@
   function importSongs(){
     const selected=selectedSetlist();if(!selected)return;
     const setId=selected.id;
-    modalForm({title:'IMPORT SONGS TO '+selected.name,submitLabel:'IMPORT SONGS',fields:'<label class="form-field" for="import-titles">SONG TITLES, SEPARATED BY COMMAS</label><textarea class="input editor-textarea" id="import-titles" name="titles" rows="7" required placeholder="Sultans of Swing, Valerie, Layla"></textarea><p>Songs are appended in the order entered. Existing songs are reused and songs already in this setlist are skipped. No votes required.</p>',onSubmit:async form=>{
+    modalForm({title:'IMPORT SONGS TO '+selected.name,submitLabel:'IMPORT SONGS',fields:'<label class="form-field" for="import-titles">SONG TITLES, SEPARATED BY COMMAS OR LINE BREAKS</label><textarea class="input editor-textarea" id="import-titles" name="titles" rows="7" required placeholder="Sultans of Swing&#10;Valerie&#10;Layla"></textarea><p>Songs are appended in the order entered. Existing songs are reused and songs already in this setlist are skipped. No votes required. Artist is saved as “Not specified” when omitted.</p>',onSubmit:async form=>{
       const entries=parseSongImport(form.get('titles')).map(title=>({title}));
       const {added,skipped}=await saveSetlistSongs(setId,entries);
       notify(added+' song'+(added===1?'':'s')+' added'+(skipped?' · '+skipped+' already in setlist':'')+'.');
