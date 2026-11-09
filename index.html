@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1924">
+  <meta name="description" content="Motel Ice Machine — St. Louis live music, shows, and band updates.">
+  <title>Motel Ice Machine | St. Louis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<div id="app">
+  <header class="site-header">
+    <a href="#home" class="small-brand" aria-label="Motel Ice Machine home">motel <span>ice</span> machine.</a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#home">HOME</a><a href="#shows">SHOWS</a><a href="#about">THE BAND</a>
+    </nav>
+    <button id="menu-button" class="menu-button" aria-expanded="false" aria-controls="site-menu">☰ &nbsp; MENU</button>
+    <div id="site-menu" class="site-menu" hidden>
+      <a href="#home">Home</a><a href="#shows">Shows</a><a href="#about">The band</a>
+      <a href="#band" id="band-menu-link" class="band-menu-link">🔒 Band login</a>
+    </div>
+  </header>
+  <div id="message" class="toast" role="status" aria-live="polite" hidden></div>
+  <main id="view"></main>
+  <footer class="footer"><div class="footer-brand">motel <span>ice</span> machine.</div><p>ST. LOUIS · MISSOURI</p><small>© <span id="year"></span> MOTEL ICE MACHINE</small></footer>
+</div>
+</body>
+</html>
