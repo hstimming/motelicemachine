@@ -52,43 +52,6 @@
   function publicSetlist(show) {
     return `<details class="show-setlist"><summary>VIEW SETLIST · ${show.titles.length} SONGS</summary><ol>${show.titles.map(title=>`<li>${escapeHTML(title)}</li>`).join('')}</ol></details>`;
   }
-  function historyImportButton(){
-    return '<button class="button secondary" data-action="import-show-history">IMPORT PHILO + TRIFRAT SHOWS & SETLISTS</button><p class="editor-help">Save the supplied 2026 shows, songs, setlists, and booking email to Supabase. Existing show details and songs are preserved.</p>';
-  }
-  let historyImportRunning=false;
-  async function importShowHistory(button){
-    if(!db||!state.member||historyImportRunning)return;
-    historyImportRunning=true;
-    button.disabled=true;
-    try {
-      // Re-read before importing so repeated imports reuse the same records.
-      const loaded=await Promise.all([loadEvents(),loadPrivate()]);
-      if(loaded.some(result=>result===false))throw Error('Could not read existing records');
-      for(const show of showHistory){
-        if(!state.events.some(e=>historyForEvent(e)?.key===show.key)){
-          const {data,error}=await db.from('events').insert({name:show.name,show_date:show.date,venue:'',city:'',show_time:null,ticket_url:null}).select('*').single();
-          if(error)throw error;state.events.push(data);
-        }
-        const name=`${show.name} — ${show.date}`;
-        let setlist=state.setlists.find(x=>x.name===name);
-        if(!setlist){const {data,error}=await db.from('setlists').insert({name}).select('*').single();if(error)throw error;setlist=data;state.setlists.push(data);}
-        for(let index=0;index<show.titles.length;index++){
-          const title=show.titles[index];
-          const aliases={valerie:['valarie'],santeria:['santaria','sanataria']};
-          const accepted=[normalizeName(title),...(aliases[normalizeName(title)]||[])];
-          let song=state.songs.find(x=>accepted.includes(normalizeName(x.title)));
-          if(!song){const {data,error}=await db.from('songs').insert({title,artist:'',tab_url:null,created_by:state.user.id}).select('*').single();if(error)throw error;song=data;state.songs.push(data);}
-          const existing=state.setlistSongs.find(x=>x.setlist_id===setlist.id&&x.song_id===song.id);
-          if(!existing){const row={setlist_id:setlist.id,song_id:song.id,position:index+1};const {error}=await db.from('setlist_songs').insert(row);if(error)throw error;state.setlistSongs.push(row);}
-        }
-      }
-      const {error}=await db.from('site_content').update({booking_email:'willaitchison2@gmail.com'}).eq('id',1);
-      if(error)throw error;
-      await Promise.all([loadEvents(),loadPrivate(),loadAbout()]);
-      notify('Shows, setlists, and booking email imported.');
-    }catch(error){notify('Import stopped: '+(error.message||String(error))+'. You can retry to complete missing records.',true);}
-    finally{historyImportRunning=false;if(button.isConnected)button.disabled=false;}
-  }
   const aboutDefaults = {
     about_title: 'Meet the Ice Machine.',
     about_bio: 'Motel Ice Machine is a St. Louis band playing live music around town.',
@@ -127,9 +90,9 @@
   }
   function setlistTab(){
     const selected = state.setlists.find(s=>s.id===state.setId) || state.setlists[0];
-    if (!selected)return historyImportButton()+'<div class="empty">No setlists available.</div>';
+    if (!selected)return '<div class="workhead"><h2>SETLIST BUILDER.</h2><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="empty">Create a setlist to add or import songs.</div>';
     const entries = state.setlistSongs.filter(x=>x.setlist_id===selected.id).sort((a,b)=>a.position-b.position||a.song_id-b.song_id);
-    return `${historyImportButton()}<div class="workhead"><div><h2>SETLIST BUILDER.</h2><p>Manage songs and their playing order.</p></div><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="set-tabs">${state.setlists.map(s=>`<button class="${s.id===selected.id?'active':''}" data-action="choose-setlist" data-id="${s.id}">${escapeHTML(s.name)}</button>`).join('')}</div><div class="workhead"><strong>${escapeHTML(selected.name)} · ${entries.length} SONGS</strong><button class="button secondary" data-action="add-to-setlist">+ ADD SONG</button></div>${entries.length?entries.map((entry,i)=>{const song=state.songs.find(s=>s.id===entry.song_id);if(!song)return '';return `<div class="set-row"><span class="position">${i+1}</span><div class="detail"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.artist)}</small><a href="${escapeHTML(linkForSong(song))}" target="_blank" rel="noopener noreferrer">TABS ↗</a></div><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="1" ${i===entries.length-1?'disabled':''}>↓</button><button class="small-button danger" data-action="remove-song" data-id="${song.id}">×</button></div>`}).join(''):'<div class="empty">This setlist is empty.</div>'}`;
+    return `<div class="workhead"><div><h2>SETLIST BUILDER.</h2><p>Manage songs and their playing order.</p></div><button class="button" data-action="new-setlist">+ NEW SETLIST</button></div><div class="set-tabs">${state.setlists.map(s=>`<button class="${s.id===selected.id?'active':''}" data-action="choose-setlist" data-id="${s.id}">${escapeHTML(s.name)}</button>`).join('')}</div><div class="workhead"><strong>${escapeHTML(selected.name)} · ${entries.length} SONGS</strong><div class="event-actions"><button class="button secondary" data-action="add-to-setlist">+ ADD SONG</button><button class="button secondary" data-action="import-songs">IMPORT SONGS</button><button class="small-button" data-action="choose-song">CHOOSE EXISTING SONG</button></div></div>${entries.length?entries.map((entry,i)=>{const song=state.songs.find(s=>s.id===entry.song_id);if(!song)return '';return `<div class="set-row"><span class="position">${i+1}</span><div class="detail"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.artist)}</small><a href="${escapeHTML(linkForSong(song))}" target="_blank" rel="noopener noreferrer">TABS ↗</a></div><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="small-button" data-action="move-song" data-id="${song.id}" data-dir="1" ${i===entries.length-1?'disabled':''}>↓</button><button class="small-button danger" data-action="remove-song" data-id="${song.id}">×</button></div>`}).join(''):'<div class="empty">This setlist is empty.</div>'}`;
   }
   function websiteTab(){
     const a=aboutContent();
@@ -275,7 +238,7 @@
   function newSetlist(){modalForm({title:'NEW SETLIST',fields:field('SETLIST NAME','name'),onSubmit:async form=>{
     const {data,error}=await db.from('setlists').insert({name:String(form.get('name')).trim()}).select('id').single();if(error)throw error;state.setId=data.id;notify('Setlist created.');
   }});}
-  function addToSetlist(){
+  function chooseExistingSong(){
     const options=state.songs.filter(s=>!state.setlistSongs.some(ss=>ss.setlist_id===state.setId&&ss.song_id===s.id));
     if(!options.length){notify('All suggested songs are already in this setlist.',true);return;}
     modalForm({title:'ADD SONG TO SETLIST',fields:`<label class="form-field" for="select-song">SONG</label><select class="input" id="select-song" name="song_id">${options.map(s=>`<option value="${s.id}">${escapeHTML(s.title)} — ${escapeHTML(s.artist)}</option>`).join('')}</select>`,onSubmit:async form=>{
@@ -283,10 +246,59 @@
       const {error}=await db.from('setlist_songs').insert({setlist_id:state.setId,song_id:Number(form.get('song_id')),position:Math.max(0,...positions)+1});if(error)throw error;notify('Song added to setlist.');
     }});
   }
+  function selectedSetlist(){return state.setlists.find(s=>s.id===state.setId)||state.setlists[0];}
+  const songIdentity = value => String(value||'').trim().toLocaleLowerCase().replace(/\s+/g,' ');
+  function parseSongImport(text){
+    const titles=String(text||'').split(',').map(x=>x.trim()).filter(Boolean);
+    if(!titles.length)throw Error('Enter at least one song title, separated by commas.');
+    if(titles.length>200)throw Error('Import up to 200 songs at a time.');
+    if(titles.some(x=>x.length>160))throw Error('Song titles must be 160 characters or fewer.');
+    return [...new Map(titles.map(title=>[songIdentity(title),title])).values()];
+  }
+  async function saveSetlistSongs(setId,entries){
+    if(!db||!state.member)throw Error('Sign in with an approved band account first.');
+    // Refresh to reuse existing songs and make retrying a partial import safe.
+    if(await loadPrivate()===false)throw Error('Could not load the current setlist. Please try again.');
+    if(!state.setlists.some(s=>s.id===setId))throw Error('This setlist is no longer available.');
+    let added=0,skipped=0;
+    let position=Math.max(0,...state.setlistSongs.filter(s=>s.setlist_id===setId).map(s=>s.position));
+    for(const entry of entries){
+      const title=entry.title.trim(),artist=(entry.artist||'').trim();
+      let song=state.songs.find(s=>songIdentity(s.title)===songIdentity(title) && (!artist||songIdentity(s.artist)===songIdentity(artist)));
+      if(!song){
+        const {data,error}=await db.from('songs').insert({title,artist,tab_url:entry.tab_url||null,created_by:state.user.id}).select('*').single();
+        if(error)throw Error('Could not save '+title+': '+error.message);song=data;state.songs.push(data);
+      }
+      if(state.setlistSongs.some(s=>s.setlist_id===setId&&s.song_id===song.id)){skipped++;continue;}
+      const row={setlist_id:setId,song_id:song.id,position:position+1};
+      const {error}=await db.from('setlist_songs').insert(row);
+      if(error)throw Error('Could not add '+title+': '+error.message+'. Earlier songs were saved; retry to finish.');
+      position++;state.setlistSongs.push(row);added++;
+    }
+    return {added,skipped};
+  }
+  function addToSetlist(){
+    const selected=selectedSetlist();if(!selected)return;
+    const setId=selected.id;
+    modalForm({title:'ADD SONG TO '+selected.name,fields:field('SONG TITLE','title')+field('ARTIST (OPTIONAL)','artist')+field('TAB URL (OPTIONAL)','tab_url','','url',false),onSubmit:async form=>{
+      const title=String(form.get('title')||'').trim();if(!title)throw Error('Enter a song title.');
+      const url=String(form.get('tab_url')||'').trim();if(url&&!validUrl(url))throw Error('Provide a valid http(s) tab URL.');
+      const result=await saveSetlistSongs(setId,[{title,artist:String(form.get('artist')||''),tab_url:url}]);
+      notify(result.added?'Song added directly to setlist.':'This song is already in the setlist.');
+    }});
+  }
+  function importSongs(){
+    const selected=selectedSetlist();if(!selected)return;
+    const setId=selected.id;
+    modalForm({title:'IMPORT SONGS TO '+selected.name,submitLabel:'IMPORT SONGS',fields:'<label class="form-field" for="import-titles">SONG TITLES, SEPARATED BY COMMAS</label><textarea class="input editor-textarea" id="import-titles" name="titles" rows="7" required placeholder="Sultans of Swing, Valerie, Layla"></textarea><p>Songs are appended in the order entered. Existing songs are reused and songs already in this setlist are skipped. No votes required.</p>',onSubmit:async form=>{
+      const entries=parseSongImport(form.get('titles')).map(title=>({title}));
+      const {added,skipped}=await saveSetlistSongs(setId,entries);
+      notify(added+' song'+(added===1?'':'s')+' added'+(skipped?' · '+skipped+' already in setlist':'')+'.');
+    }});
+  }
   async function action(button){
     const kind=button.dataset.action,id=Number(button.dataset.id);
     if(!state.member&&kind!=='refresh')return;
-    if(kind==='import-show-history'){await importShowHistory(button);return;}
     if(kind==='tab'){state.tab=button.dataset.tab;await loadPrivate();return;}
     if(kind==='refresh'){await Promise.all([loadEvents(),loadPrivate()]);notify('Data refreshed.');return;}
     if(kind==='logout'){await db.auth.signOut();state.member=false;state.user=null;location.hash='#home';notify('Signed out.');return;}
@@ -294,6 +306,8 @@
     if(kind==='edit-event'){editEvent(id);return;}
     if(kind==='new-song'){newSong();return;}
     if(kind==='new-setlist'){newSetlist();return;}
+    if(kind==='import-songs'){importSongs();return;}
+    if(kind==='choose-song'){chooseExistingSong();return;}
     if(kind==='add-to-setlist'){addToSetlist();return;}
     if(kind==='choose-setlist'){state.setId=id;render();return;}
     button.disabled=true;
