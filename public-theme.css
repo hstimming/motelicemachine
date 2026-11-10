@@ -161,13 +161,20 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
     min-height: min(78vh, 680px);
     padding: 48px clamp(24px, 6vw, 80px) 56px;
     justify-content: center;
-    background:
-      radial-gradient(ellipse 35% 100% at 43% 48%, rgba(0, 0, 0, .2), transparent 80%),
-      linear-gradient(to right, var(--mim-black) 40%, rgba(0, 0, 0, .9) 47%, rgba(0, 0, 0, .65) 55%, rgba(0, 0, 0, .32) 64%, rgba(0, 0, 0, .1) 75%, transparent 87%),
-      linear-gradient(to left, rgba(0, 0, 0, .35), transparent 12%),
-      linear-gradient(to bottom, transparent 84%, rgba(0, 0, 0, .35)),
-      url("assets/brand/motel-night.webp") right 6% bottom / auto 112% no-repeat,
-      var(--mim-black);
+    background: var(--mim-black);
+  }
+  /* Fade the photo itself around the lit alcove, not across the whole page. */
+  html[data-zone="public"][data-skin="orange"] .hero::before {
+    content: "";
+    position: absolute;
+    right: 6%;
+    bottom: 0;
+    height: 112%;
+    aspect-ratio: 386 / 639;
+    background: url("assets/brand/motel-night.webp") center / cover no-repeat;
+    -webkit-mask-image: radial-gradient(ellipse 58% 49% at 56% 65%, #000 22%, rgba(0,0,0,.96) 45%, rgba(0,0,0,.58) 73%, transparent 100%);
+    mask-image: radial-gradient(ellipse 58% 49% at 56% 65%, #000 22%, rgba(0,0,0,.96) 45%, rgba(0,0,0,.58) 73%, transparent 100%);
+    pointer-events: none;
   }
   /* computers: the logo as three straight stacked lines beside the photo */
   html[data-zone="public"][data-skin="orange"] .hero-brand {
