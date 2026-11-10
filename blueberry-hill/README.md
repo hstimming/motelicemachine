@@ -26,10 +26,11 @@ After this page is live, a band member edits the Blueberry Hill show in the Even
 
 ## Accessibility
 
-- "Skip to tickets" is always visible at the top.
 - Works with touch, mouse, and keyboard (Tab, Enter, and the Up and Down arrow keys).
-- If the visitor's device asks for reduced motion, or they press "Reduce motion" on the page, nothing moves or flickers.
+- A link ending in `#tickets` (https://hstimming.github.io/motelicemachine/blueberry-hill/#tickets) opens the card directly.
+- If the visitor's device is set to reduce motion, nothing moves or flickers.
 - The flicker is slow and shallow, and the page never flashes. There is no sound.
+- Screen readers hear a short line at each step, plus the date and time in the page heading.
 - Without JavaScript, the page shows the poster and the card with all the show details.
 
 ## Files
