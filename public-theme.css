@@ -63,10 +63,10 @@ html[data-zone="public"] .site-header {
   border-bottom: 1px solid var(--mim-line);
 }
 html[data-zone="public"] .small-brand {
-  width: 230px;
-  background: url("assets/brand/wordmark.svg") left center / contain no-repeat;
+  width: 190px;
+  background: none;
 }
-html[data-zone="public"] .small-brand img { opacity: 0; } /* keeps its alt text for screen readers */
+html[data-zone="public"] .small-brand img { opacity: 1; }
 html[data-zone="public"] .desktop-nav a {
   font: italic 900 19px/1 var(--mim-display);
   letter-spacing: .04em;
@@ -375,7 +375,7 @@ html[data-zone="public"] .toast {
 html[data-zone="public"] .toast.is-error { background: #ffd2c4; }
 
 @media (max-width: 680px) {
-  html[data-zone="public"] .small-brand { width: 190px; }
+  html[data-zone="public"] .small-brand { width: 175px; }
   html[data-zone="public"] .event-date { min-width: 68px; }
   html[data-zone="public"] .event-date b { font-size: 38px; }
   html[data-zone="public"] .event-info { padding: 12px 14px; }
