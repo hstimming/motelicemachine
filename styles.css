@@ -43,3 +43,7 @@
 .site-header{min-height:68px;padding-top:12px;padding-bottom:12px}.hero .hero-caption{position:relative;margin-top:24px}
 @media(max-width:680px){.hero-brand{margin:-5px auto -14px}.small-brand{width:175px}.small-brand img{height:34px}.hero .hero-caption{margin-top:18px}}
 @media(max-width:360px){.small-brand{width:160px}.site-header{gap:10px}}
+
+/* With the decorative location label removed, let the homepage sign lead. */
+.hero{padding-top:30px}.past-shows>h2{margin-top:0}
+@media(max-width:680px){.hero{padding-top:20px}}
