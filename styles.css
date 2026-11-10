@@ -40,3 +40,8 @@
 /* Photographic neon signage shared by the homepage and header. */
 .hero-brand{max-width:780px;margin:-14px auto -34px;line-height:0}.hero-brand img{display:block;width:100%;height:auto}.small-brand{display:block;flex-shrink:0;width:156px;line-height:0;overflow:hidden}.small-brand img{display:block;width:100%;height:76px;object-fit:cover;object-position:center}.site-header{padding-top:5px;padding-bottom:5px}.hero .hero-caption{position:relative;margin-top:24px}
 @media(max-width:680px){.hero-brand{margin:-5px -7px -14px}.small-brand{width:136px}.small-brand img{height:66px}.hero .hero-caption{margin-top:18px}}
+
+/* Compact single-line header sign; the large homepage sign stays centered. */
+.small-brand{width:clamp(210px,24vw,280px)}.small-brand img{height:56px;object-fit:cover}.site-header{min-height:68px}
+@media(max-width:680px){.small-brand{width:200px}.small-brand img{height:46px}}
+@media(max-width:360px){.small-brand{width:175px}.site-header{gap:10px}}
