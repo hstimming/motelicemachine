@@ -64,9 +64,9 @@ html[data-zone="public"][data-skin="orange"] .site-header {
 }
 html[data-zone="public"][data-skin="orange"] .small-brand {
   width: 190px;
-  background: url("assets/brand/wordmark.svg") left center / contain no-repeat;
+  background: none;
 }
-html[data-zone="public"][data-skin="orange"] .small-brand img { opacity: 0; }
+html[data-zone="public"][data-skin="orange"] .small-brand img { opacity: 1; }
 html[data-zone="public"][data-skin="orange"] .desktop-nav a {
   font: italic 900 19px/1 var(--mim-display);
   letter-spacing: .04em;
@@ -130,15 +130,15 @@ html[data-zone="public"][data-skin="orange"] .hero-brand {
   width: 95.5%;
   max-width: 620px;
   margin: .6vw 0 0 calc(1.8% - 16px);
-  aspect-ratio: 368.79 / 279.92;
-  background: url("assets/brand/lettering.svg") left top / contain no-repeat;
+  aspect-ratio: auto;
+  background: none;
 }
 html[data-zone="public"][data-skin="orange"] .hero-brand img {
-  /* the old sign image stays in the page for its alt text, but isn't shown */
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 1;
 }
 html[data-zone="public"][data-skin="orange"] .hero-location {
   order: 2;
@@ -172,8 +172,8 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
   html[data-zone="public"][data-skin="orange"] .hero-brand {
     width: min(40vw, 540px);
     margin: 0;
-    aspect-ratio: 371 / 243.6;
-    background-image: url("assets/brand/lettering-stacked.svg");
+    aspect-ratio: auto;
+    background-image: none;
   }
   html[data-zone="public"][data-skin="orange"] .hero-location { margin: 18px 0 8px; }
   html[data-zone="public"][data-skin="orange"] .hero .hero-caption { margin-top: 14px; }
