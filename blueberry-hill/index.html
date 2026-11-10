@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Motel Ice Machine at Blueberry Hill</title>
+<meta name="description" content="Motel Ice Machine live at Blueberry Hill in St. Louis on Monday, December 7, 2026 at 9 PM. Walk up to the ice machine to find your invitation.">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Motel Ice Machine at Blueberry Hill">
+<meta property="og:description" content="Monday, December 7, 2026, 9 PM. Blueberry Hill, St. Louis.">
+<meta property="og:url" content="https://hstimming.github.io/motelicemachine/blueberry-hill/">
+<meta property="og:image" content="https://hstimming.github.io/motelicemachine/blueberry-hill/assets/share-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Motel Ice Machine at Blueberry Hill, Monday, December 7, 2026, 9 PM.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="assets/motel-night.webp" as="image" type="image/webp">
+<link rel="preload" href="assets/poster-title.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/vt323.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js');</script>
+<style>
+@font-face {
+  font-family: "Poster Title";
+  src: url("assets/poster-title.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "VT323";
+  src: url("assets/vt323.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Layout: a portrait security monitor in the poster's own frame, a console of controls under it,
+   and a guest registration card that rises out of the ice machine. One dark look, by design. */
+:root {
+  --black: #000;
+  --paper: #ecebe4;      /* card stock; HUD and subtitle text */
+  --ink: #1d1d1b;        /* dot-matrix ink on the card */
+  --orange: #cf4b21;     /* logo orange, read from the band's poster file */
+  --orange-ink: #b23a12; /* small orange print on the card (5:1 on paper) */
+  --steel: #8b9295;      /* quiet lines and secondary text on black */
+  --frost: #d7e6eb;      /* cold light from the open freezer */
+  --font-display: "Poster Title", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-hud: "VT323", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--black);
+  color: var(--paper);
+  font: 16px/1.45 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+/* ---------- Console ---------- */
+.console {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-inline: auto;
+}
+@media (min-width: 600px) {
+  .console {
+    width: min(100%, max(380px, calc((100vh - 200px) * 0.6041)));
+    width: min(100%, max(380px, calc((100dvh - 200px) * 0.6041)));
+  }
+  .scene { border: 1px solid #262626; border-radius: 4px; }
+}
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: max(6px, env(safe-area-inset-top, 0px)) 6px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.skip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 23px/1 var(--font-hud);
+  color: var(--paper);
+  text-decoration: underline;
+  text-decoration-color: var(--orange);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.skip:hover { text-decoration-color: var(--paper); }
+.motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid #3a3d3e;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--steel);
+  font: 20px/1 var(--font-hud);
+  cursor: pointer;
+}
+.motion-toggle .box::before { content: "[ ]"; white-space: pre; }
+.motion-toggle[aria-pressed="true"] { color: var(--paper); border-color: var(--paper); }
+.motion-toggle[aria-pressed="true"] .box::before { content: "[x]"; }
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- The monitor ---------- */
+.scene {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--black);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.is-open .scene { cursor: default; }
+.bob { position: absolute; inset: 0; }
+.walking .bob { animation: bob 1.25s ease-in-out; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  22% { transform: translateY(-3px); }
+  46% { transform: translateY(1px); }
+  70% { transform: translateY(-2px); }
+}
+
+/* The world is the photo's own pixel grid (386 x 639). The script moves the camera over it. */
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 386px;
+  height: 639px;
+  transform-origin: 0 0;
+  transition: transform 1.25s cubic-bezier(.42, .08, .22, 1);
+}
+.world img { display: block; max-width: none; }
+.world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, var(--black), rgba(0, 0, 0, 0) 22px, rgba(0, 0, 0, 0) calc(100% - 30px), var(--black)),
+    linear-gradient(to right, var(--black), rgba(0, 0, 0, 0) 10px, rgba(0, 0, 0, 0) calc(100% - 10px), var(--black));
+}
+.photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 386px;
+  height: 639px;
+  -webkit-user-drag: none;
+}
+
+/* Inside the ice machine */
+.interior {
+  position: absolute;
+  left: 176px;
+  top: 487px;
+  width: 91px;
+  height: 88px;
+  clip-path: polygon(0 0, 100% 0, 100% 92.05%, 0 100%);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -8%, rgba(215, 230, 235, .75), rgba(215, 230, 235, 0) 72%),
+    linear-gradient(#151b1d, #050607 80%);
+}
+.interior::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 2px rgba(215, 230, 235, .22), inset 0 0 16px rgba(0, 0, 0, .9);
+}
+.bag {
+  position: absolute;
+  bottom: 6px;
+  width: 27px;
+  height: 24px;
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(rgba(234, 241, 243, .8), rgba(150, 164, 169, .6));
+}
+.bag::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 8px;
+  height: 7px;
+  margin-left: -4px;
+  border-radius: 3px 3px 1px 1px;
+  background: rgba(205, 216, 220, .75);
+}
+.bag-1 { left: 5px; }
+.bag-2 { left: 32px; bottom: 9px; height: 27px; }
+.bag-3 { left: 59px; bottom: 9px; }
+.mini-card {
+  position: absolute;
+  left: 29px;
+  top: 30px;
+  width: 33px;
+  height: 22px;
+  background: var(--paper);
+  border-top: 3px solid var(--orange);
+  transform: rotate(-9deg);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .7);
+  transition: opacity .2s;
+}
+.is-revealed .mini-card { opacity: 0; }
+
+/* The door: a cut-out of the photo that swings open on its right-hand hinge */
+.door-frame {
+  position: absolute;
+  left: 176px;
+  top: 487px;
+  width: 91px;
+  height: 88px;
+  perspective: 420px;
+  perspective-origin: -40% 45%;
+}
+.door {
+  position: absolute;
+  inset: 0;
+  transform-origin: 100% 50%;
+  transform-style: preserve-3d;
+  transition: transform 1.3s cubic-bezier(.33, .02, .18, 1);
+}
+.is-open .door { transform: rotateY(106deg); }
+.door-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.door-front { clip-path: polygon(0 0, 100% 0, 100% 92.05%, 0 100%); }
+.door-front img {
+  position: absolute;
+  left: -176px;
+  top: -487px;
+  width: 386px;
+  height: 639px;
+}
+.door-back {
+  transform: rotateY(180deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 92.05%);
+  background: linear-gradient(90deg, #2a2e2f, #575e60 42%, #3a3f41);
+  box-shadow: inset 0 0 0 3px #17191a, inset 0 0 0 5px #7d8689;
+}
+.door-glow {
+  position: absolute;
+  left: 138px;
+  top: 438px;
+  width: 168px;
+  height: 196px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 46% 40% at 50% 52%, rgba(215, 230, 235, .5), rgba(215, 230, 235, 0) 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 1.6s ease .3s;
+}
+.is-open .door-glow { opacity: 1; }
+
+/* The breezeway bulb: a slow, shallow flicker */
+.bulb {
+  position: absolute;
+  left: 283px;
+  top: 237px;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 247, 228, .5), rgba(255, 247, 228, .12) 40%, rgba(255, 247, 228, 0) 68%);
+  mix-blend-mode: screen;
+  animation: bulb 6.5s ease-in-out infinite;
+}
+@keyframes bulb {
+  0%, 100% { opacity: .95; }
+  17% { opacity: .78; }
+  21% { opacity: .95; }
+  54% { opacity: .85; }
+  58% { opacity: 1; }
+}
+
+/* Cold fog: puffs that spill from the door and sink onto the concrete */
+.fog {
+  position: absolute;
+  left: 120px;
+  top: 470px;
+  width: 200px;
+  height: 169px;
+  pointer-events: none;
+}
+.floor-fog {
+  position: absolute;
+  left: 6px;
+  top: 110px;
+  width: 188px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(233, 240, 242, .55), rgba(233, 240, 242, 0));
+  opacity: 0;
+  transform: scaleX(.3);
+  transition: opacity 1.8s ease .5s, transform 3.5s cubic-bezier(.2, .7, .2, 1) .4s;
+}
+.is-open .floor-fog { opacity: .9; transform: scaleX(1); }
+/* the sheet of cold air pouring over the freezer's lip */
+.spill {
+  position: absolute;
+  left: 52px;
+  top: 78px;
+  width: 99px;
+  height: 62px;
+  transform-origin: 50% 0;
+  border-radius: 45% 45% 50% 50% / 30% 30% 70% 70%;
+  background: linear-gradient(to bottom, rgba(236, 243, 245, 0), rgba(236, 243, 245, .8) 32%, rgba(236, 243, 245, .5) 72%, rgba(236, 243, 245, 0));
+  filter: blur(2.5px);
+  opacity: 0;
+  transform: scaleY(0);
+  transition: opacity .9s ease .35s, transform 1.4s cubic-bezier(.2, .7, .2, 1) .35s;
+}
+.is-open .spill {
+  opacity: .95;
+  transform: scaleY(1);
+  animation: breathe 4.5s ease-in-out 1.8s infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: .95; transform: scaleY(1) scaleX(1); }
+  50% { opacity: .78; transform: scaleY(1.08) scaleX(1.05); }
+}
+/* fog settling inside the freezer, around the ice bags */
+.mist {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  bottom: -4px;
+  height: 50%;
+  background: radial-gradient(ellipse 62% 72% at 50% 100%, rgba(236, 243, 245, .8), rgba(236, 243, 245, 0) 72%);
+  filter: blur(1.5px);
+  opacity: 0;
+  transition: opacity 1s ease .2s;
+}
+.is-open .mist { opacity: 1; }
+.puff {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: calc(var(--w) * .62);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(236, 243, 245, .82), rgba(236, 243, 245, .3) 55%, rgba(236, 243, 245, 0));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.3);
+}
+.is-open .puff { animation: spill var(--dur) cubic-bezier(.25, .6, .35, 1) var(--delay) infinite both; }
+@keyframes spill {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+  18% { opacity: var(--peak); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s)); }
+}
+.p1 { --x: 101px; --y: 92px; --w: 62px; --dx: -55px; --dy: 40px; --s: 2.2; --peak: .95; --dur: 5.6s; --delay: .3s; }
+.p2 { --x: 101px; --y: 92px; --w: 62px; --dx: 60px; --dy: 42px; --s: 2.3; --peak: .95; --dur: 6.2s; --delay: .45s; }
+.p3 { --x: 85px; --y: 86px; --w: 48px; --dx: -25px; --dy: 56px; --s: 2; --peak: .9; --dur: 5.2s; --delay: .6s; }
+.p4 { --x: 118px; --y: 88px; --w: 50px; --dx: 30px; --dy: 54px; --s: 2.1; --peak: .9; --dur: 5.5s; --delay: .8s; }
+.p5 { --x: 101px; --y: 78px; --w: 42px; --dx: 5px; --dy: -26px; --s: 1.9; --peak: .6; --dur: 4.8s; --delay: .5s; }
+.p6 { --x: 70px; --y: 98px; --w: 54px; --dx: -80px; --dy: 46px; --s: 2.5; --peak: .85; --dur: 7s; --delay: 1.1s; }
+.p7 { --x: 132px; --y: 98px; --w: 54px; --dx: 82px; --dy: 44px; --s: 2.5; --peak: .85; --dur: 7.4s; --delay: 1.4s; }
+.p8 { --x: 101px; --y: 96px; --w: 72px; --dx: 0px; --dy: 50px; --s: 2.4; --peak: .8; --dur: 6.6s; --delay: 1.8s; }
+.p9 { --x: 95px; --y: 70px; --w: 38px; --dx: -12px; --dy: -30px; --s: 1.7; --peak: .55; --dur: 5.4s; --delay: 2.2s; }
+
+/* The band's lettering, placed exactly where it sits on the poster */
+.lettering {
+  position: absolute;
+  left: 6.81px;
+  top: 3.88px;
+  width: 368.79px;
+  margin: 0;
+  font-size: 1rem;
+  z-index: 2;
+  transition: opacity .7s ease;
+}
+.lettering img { width: 368.79px; height: 279.92px; }
+.scene:not([data-step="0"]) .lettering,
+.is-open .lettering { opacity: 0; }
+
+/* Camera effects over the picture */
+.fx {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx > * { position: absolute; inset: 0; }
+.flicker {
+  background: var(--black);
+  opacity: 0;
+  animation: flicker 7s ease-in-out infinite;
+}
+@keyframes flicker {
+  0%, 100% { opacity: 0; }
+  12% { opacity: .035; }
+  16% { opacity: .01; }
+  47% { opacity: .03; }
+  52% { opacity: 0; }
+  78% { opacity: .04; }
+  84% { opacity: .015; }
+}
+.scanlines { background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .24) 0 1px, rgba(0, 0, 0, 0) 1px 3px); }
+.roll {
+  inset: auto 0;
+  top: -25%;
+  height: 25%;
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, .04) 50%, rgba(255, 255, 255, 0));
+  animation: roll 9s linear infinite;
+}
+@keyframes roll { to { transform: translateY(500%); } }
+.grain {
+  inset: -64px;
+  opacity: .14;
+  background-size: 96px 96px;
+  animation: grain 1s steps(1, end) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-21px, 13px); }
+  20% { transform: translate(17px, -27px); }
+  30% { transform: translate(-33px, -7px); }
+  40% { transform: translate(29px, 21px); }
+  50% { transform: translate(-9px, 35px); }
+  60% { transform: translate(37px, -15px); }
+  70% { transform: translate(-27px, -31px); }
+  80% { transform: translate(11px, 27px); }
+  90% { transform: translate(-39px, 9px); }
+}
+.vignette { background: radial-gradient(ellipse 80% 72% at 50% 46%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, .6) 100%); }
+
+/* Security-camera overlay */
+.hud {
+  position: absolute;
+  z-index: 4;
+  top: 10px;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  font: 21px/1 var(--font-hud);
+  letter-spacing: .04em;
+  color: var(--paper);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .95), 0 0 8px rgba(0, 0, 0, .7);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.rec { display: inline-flex; align-items: center; gap: 7px; }
+.rec::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  animation: rec 2.4s ease-in-out infinite;
+}
+@keyframes rec { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* ---------- Controls: a text box under the picture, like an old adventure game ---------- */
+.controls {
+  flex: none;
+  display: grid;
+  gap: 10px;
+  padding-block: 10px max(14px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.is-open .controls { visibility: hidden; }
+.narration {
+  margin: 0;
+  min-height: 2.3em;
+  font: 20px/1.15 var(--font-hud);
+  color: var(--paper);
+  text-wrap: pretty;
+}
+.prompt { color: var(--orange); }
+.buttons { display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  border: 2px solid var(--paper);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--paper);
+  font: italic 900 23px/1 var(--font-display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn svg { width: 13px; height: 13px; flex: none; fill: currentColor; }
+.btn-go { background: var(--orange); border-color: var(--orange); color: var(--black); }
+.btn-go:hover { background: #dd5528; border-color: #dd5528; }
+.btn-back:not(:disabled):hover { background: rgba(236, 235, 228, .1); }
+.btn:disabled { opacity: .3; cursor: default; }
+.btn-go .icon-open { display: none; }
+.btn-go[data-mode="open"] .icon-open { display: block; }
+.btn-go[data-mode="open"] .icon-walk { display: none; }
+.keys {
+  display: none;
+  margin: 0;
+  font: 18px/1 var(--font-hud);
+  color: var(--steel);
+  text-align: center;
+}
+@media (hover: hover) and (pointer: fine) { .keys { display: block; } }
+
+/* ---------- The invitation ---------- */
+.invite { padding: 24px 16px 40px; }
+.js .invite {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: none;
+  flex-direction: column;
+  overflow: auto;
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: radial-gradient(ellipse 75% 60% at 50% 55%, rgba(0, 0, 0, .3), rgba(0, 0, 0, .82));
+}
+.js .invite.is-shown { display: flex; }
+.invite-card {
+  position: relative;
+  width: min(100%, 360px);
+  margin: auto;
+  padding: 22px 22px 12px;
+  background: var(--paper);
+  color: var(--ink);
+  transform: rotate(-1.2deg);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .55);
+}
+.invite-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 55% at 0% 0%, rgba(190, 214, 222, .42), rgba(190, 214, 222, 0) 45%),
+    radial-gradient(90% 45% at 100% 100%, rgba(190, 214, 222, .38), rgba(190, 214, 222, 0) 50%);
+}
+.invite-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--paper-grain, none);
+  background-size: 96px 96px;
+  opacity: .07;
+  mix-blend-mode: multiply;
+}
+.invite-card > * { position: relative; }
+.kicker {
+  margin: 0 0 6px;
+  font: 700 12px/1 var(--font-ui);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--orange-ink);
+}
+.invite-title {
+  margin: 0;
+  font: italic 900 40px/.95 var(--font-display);
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.invite-title:focus { outline: none; }
+.invite-title:focus-visible { outline: 2px dashed var(--orange-ink); outline-offset: 4px; }
+.fields { margin: 14px 0 16px; border-top: 2px solid var(--orange-ink); }
+.field {
+  display: grid;
+  grid-template-columns: 4.6em 1fr;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 0 7px;
+  border-bottom: 1px solid rgba(178, 58, 18, .4);
+}
+.field dt {
+  font: 700 11px/1 var(--font-ui);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--orange-ink);
+}
+.field dd { margin: 0; font: 27px/1 var(--font-hud); color: var(--ink); }
+.ticket-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--orange);
+  color: var(--black);
+  font: italic 900 30px/1 var(--font-display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+a.ticket-button:hover { background: #dd5528; }
+.ticket-button:disabled {
+  background: transparent;
+  color: var(--ink);
+  border: 2px dashed var(--orange-ink);
+  font-size: 25px;
+  cursor: not-allowed;
+}
+.ticket-button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.ticket-note { margin: 8px 0 0; font: 14px/1.3 var(--font-ui); color: #4a4a46; text-align: center; }
+.invite-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font: 15px/1.2 var(--font-ui);
+}
+.invite-links a,
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.invite-links a:focus-visible,
+.link-button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* ---------- Without JavaScript: the poster, then the card ---------- */
+html:not(.js) .console { height: auto; }
+html:not(.js) .stage { display: block; }
+html:not(.js) .scene,
+html:not(.js) .controls,
+html:not(.js) .motion-toggle,
+html:not(.js) .link-button { display: none; }
+html:not(.js) .invite-card { transform: none; margin: 0 auto; }
+.noscript-poster { position: relative; width: min(100%, 420px); margin: 0 auto; }
+.noscript-poster img { display: block; width: 100%; height: auto; }
+.noscript-poster h1 { position: absolute; left: 1.764%; top: .607%; width: 95.54%; margin: 0; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 370px) {
+  .narration { font-size: 18px; }
+  .btn { font-size: 20px; }
+}
+@media (max-height: 620px) {
+  .narration { font-size: 18px; }
+  .btn { min-height: 48px; font-size: 20px; }
+  .hud { font-size: 18px; }
+}
+
+/* ---------- Motion off: nothing moves, flickers or animates ---------- */
+.no-anim, .no-anim *, .no-anim *::before, .no-anim *::after { transition: none !important; }
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.reduce-motion .is-open .puff {
+  opacity: .42;
+  transform: translate(calc(-50% + var(--dx) * .45), calc(-50% + var(--dy) * .45)) scale(calc(var(--s) * .7));
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not(.js) *, html:not(.js) *::before, html:not(.js) *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="console">
+  <header class="topbar">
+    <a class="skip" id="skip" href="#tickets">Skip to tickets</a>
+    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false"><span class="box" aria-hidden="true"></span>Reduce motion</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <noscript>
+      <div class="noscript-poster">
+        <img src="assets/motel-night.webp" width="386" height="639" alt="An ice machine marked ICE under a motel breezeway at night.">
+        <h1><img src="assets/lettering.svg" width="369" height="280" alt="Motel Ice Machine"></h1>
+      </div>
+    </noscript>
+
+    <div class="scene" id="scene" data-step="0">
+      <div class="bob">
+        <div class="world" id="world">
+          <img class="photo" src="assets/motel-night.webp" width="386" height="639" alt="Security camera view of a motel breezeway at night. An ice machine marked ICE stands under a ceiling light." draggable="false">
+          <div class="interior" aria-hidden="true">
+            <span class="bag bag-1"></span><span class="bag bag-2"></span><span class="bag bag-3"></span>
+            <span class="mist"></span>
+            <span class="mini-card"></span>
+          </div>
+          <div class="door-frame" aria-hidden="true">
+            <div class="door">
+              <div class="door-face door-front"><img src="assets/motel-night.webp" width="386" height="639" alt="" draggable="false"></div>
+              <div class="door-face door-back"></div>
+            </div>
+          </div>
+          <div class="door-glow" aria-hidden="true"></div>
+          <div class="bulb" aria-hidden="true"></div>
+          <div class="fog" aria-hidden="true">
+            <span class="floor-fog"></span>
+            <span class="spill"></span>
+            <span class="puff p1"></span><span class="puff p2"></span><span class="puff p3"></span>
+            <span class="puff p4"></span><span class="puff p5"></span><span class="puff p6"></span>
+            <span class="puff p7"></span><span class="puff p8"></span><span class="puff p9"></span>
+          </div>
+          <h1 class="lettering"><img src="assets/lettering.svg" width="369" height="280" alt="Motel Ice Machine"><span class="sr-only"> live at Blueberry Hill</span></h1>
+        </div>
+      </div>
+      <div class="fx" aria-hidden="true">
+        <div class="flicker"></div>
+        <div class="scanlines"></div>
+        <div class="roll"></div>
+        <div class="grain" id="grain"></div>
+        <div class="vignette"></div>
+      </div>
+      <div class="hud" aria-hidden="true">
+        <span class="rec">REC&nbsp; CAM 02</span>
+        <span>12/07/2026 MON</span>
+        <span id="clock">21:00:00</span>
+      </div>
+    </div>
+
+    <div class="controls" id="controls">
+      <p class="narration" id="narration"><span class="prompt" aria-hidden="true">&gt; </span><span id="narration-text">Blueberry Hill. Dec 7, 9 PM. Your invitation is in the ice machine.</span></p>
+      <div class="buttons">
+        <button class="btn btn-back" id="back" type="button" disabled>
+          <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M6 11 .5 1h11z"/></svg>Step back
+        </button>
+        <button class="btn btn-go" id="forward" type="button" data-mode="walk">
+          <svg class="icon-walk" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M6 1 11.5 11H.5z"/></svg>
+          <svg class="icon-open" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2 0h8v12H2zm1.5 1.5v9h5v-9zM6.5 5.5h1.5v1.5H6.5z" fill-rule="evenodd"/></svg>
+          <span id="forward-label">Walk closer</span>
+        </button>
+      </div>
+      <p class="keys">Up and Down arrow keys work too.</p>
+    </div>
+
+    <section class="invite" id="tickets" aria-labelledby="invite-title">
+      <div class="invite-card" id="invite-card">
+        <p class="kicker">Guest registration</p>
+        <h2 class="invite-title" id="invite-title" tabindex="-1">Motel Ice Machine</h2>
+        <dl class="fields">
+          <div class="field"><dt>Date</dt><dd><time datetime="2026-12-07">Mon, Dec 7, 2026</time></dd></div>
+          <div class="field"><dt>Time</dt><dd><time datetime="2026-12-07T21:00">9 PM</time></dd></div>
+          <div class="field"><dt>Venue</dt><dd>Blueberry Hill</dd></div>
+          <div class="field"><dt>City</dt><dd>St. Louis</dd></div>
+        </dl>
+        <div class="ticket-slot" id="ticket-slot">
+          <button class="ticket-button" type="button" disabled>Tickets coming soon</button>
+        </div>
+        <p class="ticket-note" id="ticket-note" hidden></p>
+        <div class="invite-links">
+          <a href="../#shows">See all shows</a>
+          <button class="link-button" id="restart" type="button">Start over</button>
+        </div>
+      </div>
+    </section>
+    <p class="sr-only" id="announcer" aria-live="polite"></p>
+  </main>
+</div>
+
+<script src="ticket-link.js"></script>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  try {
+    start();
+  } catch (err) {
+    // If anything goes wrong, fall back to the plain page: poster, then the card.
+    root.classList.remove('js');
+    if (window.console && console.error) console.error(err);
+  }
+
+  function start() {
+    const $ = (id) => document.getElementById(id);
+    const stage = $('stage');
+    const scene = $('scene');
+    const world = $('world');
+    const narrationText = $('narration-text');
+    const announcer = $('announcer');
+    const back = $('back');
+    const forward = $('forward');
+    const forwardLabel = $('forward-label');
+    const invite = $('tickets');
+    const card = $('invite-card');
+    const title = $('invite-title');
+    const skip = $('skip');
+    const restart = $('restart');
+    const motionToggle = $('motion-toggle');
+    const clock = $('clock');
+    const grain = $('grain');
+    const slot = $('ticket-slot');
+    const note = $('ticket-note');
+
+    const IMG = { w: 386, h: 639 };              // the photo's own pixel grid
+    const DOOR = { x: 176, y: 487, w: 91, h: 88 }; // the ICE door, measured on the photo
+    const LAST = 2;                               // the step where the door can be opened
+    const SHOTS = [
+      { region: null,
+        line: 'Blueberry Hill. Dec 7, 9 PM. Your invitation is in the ice machine.' },
+      { region: { x: 88, y: 268, w: 284, h: 344 },
+        line: 'You cross the lot. The ice machine hums under the light.' },
+      { region: { x: 118, y: 370, w: 184, h: 232 },
+        line: 'You reach the ice machine. Cold air leaks around the door.' },
+      { region: { x: 146, y: 438, w: 150, h: 176 },
+        line: 'The door swings open. Cold fog spills out. Your invitation is inside.' }
+    ];
+
+    let step = 0;
+    let isOpen = false;
+    let revealTimer = 0;
+    let walkTimer = 0;
+    let clockTimer = 0;
+    const loadedAt = Date.now();
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+    /* ---------- Motion preference ---------- */
+    const mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    let choice = null; // 'reduce' or 'full' once someone presses the toggle
+    try { choice = localStorage.getItem('mim-motion'); } catch (e) { choice = null; }
+    const reduced = () => (choice === 'reduce' || choice === 'full') ? choice === 'reduce' : !!(mq && mq.matches);
+
+    function applyMotion() {
+      const r = reduced();
+      root.classList.toggle('reduce-motion', r);
+      motionToggle.setAttribute('aria-pressed', String(r));
+      startClock();
+    }
+    motionToggle.addEventListener('click', () => {
+      choice = reduced() ? 'full' : 'reduce';
+      try { localStorage.setItem('mim-motion', choice); } catch (e) { /* not saved; fine */ }
+      applyMotion();
+    });
+    if (mq) {
+      const onSystemChange = () => { if (!choice) applyMotion(); };
+      if (mq.addEventListener) mq.addEventListener('change', onSystemChange);
+      else if (mq.addListener) mq.addListener(onSystemChange);
+    }
+
+    /* ---------- Security-camera clock: starts at showtime, 21:00:00 ---------- */
+    function renderClock() {
+      const sec = reduced() ? 0 : Math.floor((Date.now() - loadedAt) / 1000);
+      const t = 21 * 3600 + sec;
+      const two = (n) => String(n).padStart(2, '0');
+      clock.textContent = two(Math.floor(t / 3600) % 24) + ':' + two(Math.floor(t / 60) % 60) + ':' + two(t % 60);
+    }
+    function startClock() {
+      clearInterval(clockTimer);
+      renderClock();
+      if (!reduced()) clockTimer = setInterval(renderClock, 1000);
+    }
+
+    /* ---------- Film grain, drawn once ---------- */
+    function makeGrain() {
+      try {
+        const c = document.createElement('canvas');
+        c.width = c.height = 128;
+        const ctx = c.getContext('2d');
+        const img = ctx.createImageData(128, 128);
+        for (let i = 0; i < img.data.length; i += 4) {
+          const v = (Math.random() * 256) | 0;
+          img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+          img.data[i + 3] = 255;
+        }
+        ctx.putImageData(img, 0, 0);
+        const url = 'url("' + c.toDataURL('image/png') + '")';
+        grain.style.backgroundImage = url;
+        card.style.setProperty('--paper-grain', url);
+      } catch (e) { /* no grain; the page still works */ }
+    }
+
+    /* ---------- Camera ---------- */
+    function camera(i) {
+      const sw = scene.clientWidth;
+      const sh = scene.clientHeight;
+      const r = SHOTS[i].region;
+      let s, tx, ty;
+      if (!r) {
+        // The whole poster, as wide as the screen allows; trim only the floor if it must.
+        s = Math.min(sw / IMG.w, (sh * 1.1) / IMG.h);
+        tx = (sw - IMG.w * s) / 2;
+        ty = IMG.h * s > sh ? 0 : (sh - IMG.h * s) / 2;
+      } else {
+        s = Math.max(Math.min((sw * 0.94) / r.w, (sh * 0.94) / r.h), Math.max(sw / IMG.w, sh / IMG.h));
+        tx = clamp(sw / 2 - (r.x + r.w / 2) * s, sw - IMG.w * s, 0);
+        ty = clamp(sh / 2 - (r.y + r.h / 2) * s, sh - IMG.h * s, 0);
+      }
+      return { s, tx, ty };
+    }
+    function placeCamera(instant) {
+      const c = camera(isOpen ? 3 : step);
+      if (instant) world.style.transition = 'none';
+      world.style.transform = 'translate(' + c.tx.toFixed(2) + 'px, ' + c.ty.toFixed(2) + 'px) scale(' + c.s.toFixed(4) + ')';
+      if (instant) {
+        void world.offsetWidth;
+        world.style.transition = '';
+      }
+    }
+
+    /* ---------- Steps ---------- */
+    function say(text) {
+      narrationText.textContent = text;
+      announcer.textContent = text; // read aloud by screen readers, even after the controls hide
+    }
+    function syncStep() {
+      scene.dataset.step = String(step);
+      back.disabled = step === 0;
+      const atDoor = step === LAST;
+      forwardLabel.textContent = atDoor ? 'Open the door' : 'Walk closer';
+      forward.dataset.mode = atDoor ? 'open' : 'walk';
+    }
+    function bob() {
+      if (reduced()) return;
+      clearTimeout(walkTimer);
+      scene.classList.remove('walking');
+      void scene.offsetWidth;
+      scene.classList.add('walking');
+      walkTimer = setTimeout(() => scene.classList.remove('walking'), 1300);
+    }
+    function go(next) {
+      if (isOpen) return;
+      next = clamp(next, 0, LAST);
+      if (next === step) return;
+      step = next;
+      syncStep();
+      bob();
+      placeCamera(reduced());
+      say(SHOTS[step].line);
+    }
+
+    function openDoor(instant) {
+      if (isOpen) return;
+      const quick = instant || reduced();
+      isOpen = true;
+      if (quick) stage.classList.add('no-anim');
+      stage.classList.add('is-open');
+      placeCamera(quick);
+      say(SHOTS[3].line);
+      clearTimeout(revealTimer);
+      if (quick) {
+        reveal(true);
+        void stage.offsetWidth;
+        requestAnimationFrame(() => stage.classList.remove('no-anim'));
+      } else {
+        revealTimer = setTimeout(() => reveal(false), 2300); // let the fog spill first
+      }
+    }
+
+    function reveal(instant) {
+      invite.classList.add('is-shown');
+      stage.classList.add('is-revealed');
+      if (!instant && !reduced() && card.animate) {
+        // Lift the card out of the ice machine's doorway.
+        const c = camera(3);
+        const sr = scene.getBoundingClientRect();
+        const fromX = sr.left + c.tx + (DOOR.x + DOOR.w / 2) * c.s;
+        const fromY = sr.top + c.ty + (DOOR.y + DOOR.h / 2) * c.s;
+        const rc = card.getBoundingClientRect();
+        const dx = fromX - (rc.left + rc.width / 2);
+        const dy = fromY - (rc.top + rc.height / 2);
+        card.animate([
+          { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(.12) rotate(-9deg)', opacity: 0 },
+          { opacity: 1, offset: 0.35 },
+          { transform: 'translate(0, 0) scale(1) rotate(-1.2deg)', opacity: 1 }
+        ], { duration: 900, easing: 'cubic-bezier(.2, .75, .25, 1)' });
+      }
+      try { title.focus({ preventScroll: true }); } catch (e) { title.focus(); }
+      try { history.replaceState(null, '', '#tickets'); } catch (e) { /* hash not updated; fine */ }
+    }
+
+    function goToTickets() {
+      if (isOpen) {
+        invite.classList.add('is-shown');
+        title.focus();
+        return;
+      }
+      clearTimeout(walkTimer);
+      scene.classList.remove('walking');
+      step = LAST;
+      syncStep();
+      openDoor(true);
+    }
+
+    function startOver() {
+      clearTimeout(revealTimer);
+      isOpen = false;
+      invite.classList.remove('is-shown');
+      stage.classList.remove('is-open', 'is-revealed');
+      step = 0;
+      syncStep();
+      placeCamera(reduced());
+      say(SHOTS[0].line);
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* fine */ }
+      forward.focus();
+    }
+
+    /* ---------- Ticket link (set in ticket-link.js) ---------- */
+    function setupTicket() {
+      const raw = typeof window.MIM_TICKET_LINK === 'string' ? window.MIM_TICKET_LINK.trim() : '';
+      // Only a real-looking Partiful event link turns the button on. Anything else, including
+      // obvious placeholders like ".../e/PASTE-LINK-HERE" or the example in ticket-link.js, keeps it disabled.
+      const match = raw.match(/^https:\/\/(?:www\.)?partiful\.com\/e\/([A-Za-z0-9_-]{6,64})\/?(?:\?[A-Za-z0-9_=&%.-]*)?$/);
+      const id = match ? match[1] : '';
+      const placeholder = /^(x+|0+|abc\w*|1234\w*)$/i.test(id) ||
+        /(paste|link|here|example|sample|placeholder|your|event|todo|tbd|test)/i.test(id);
+      if (!match || placeholder) return;
+      const a = document.createElement('a');
+      a.className = 'ticket-button';
+      a.href = raw;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = 'Get tickets';
+      a.setAttribute('aria-describedby', 'ticket-note');
+      slot.textContent = '';
+      slot.appendChild(a);
+      note.textContent = 'Opens Partiful in a new tab.';
+      note.hidden = false;
+    }
+
+    /* ---------- Wiring ---------- */
+    forward.addEventListener('click', () => (step < LAST ? go(step + 1) : openDoor(false)));
+    back.addEventListener('click', () => go(step - 1));
+    restart.addEventListener('click', startOver);
+    skip.addEventListener('click', (e) => { e.preventDefault(); goToTickets(); });
+    scene.addEventListener('click', (e) => {
+      if (isOpen || e.target.closest('a, button')) return;
+      forward.click();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (isOpen || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        forward.click();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!back.disabled) back.click();
+      }
+    });
+    window.addEventListener('hashchange', () => { if (location.hash === '#tickets') goToTickets(); });
+
+    // Re-frame when the screen changes size (rotating a phone, fonts arriving).
+    // During the first moment after load, snap instead of gliding.
+    let resizeFrame = 0;
+    let settled = false;
+    setTimeout(() => { settled = true; }, 1200);
+    const onResize = () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => placeCamera(!settled || reduced()));
+    };
+    if ('ResizeObserver' in window) new ResizeObserver(onResize).observe(scene);
+    else window.addEventListener('resize', onResize);
+
+    makeGrain();
+    applyMotion();
+    setupTicket();
+    syncStep();
+    placeCamera(true);
+    if (location.hash === '#tickets') goToTickets();
+  }
+})();
+</script>
+</body>
+</html>
