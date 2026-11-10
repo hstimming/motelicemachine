@@ -50,6 +50,6 @@
 
 /* A quiet neon seam separates the sign from the show listings. */
 .hero::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:min(88%,1000px);height:2px;background:linear-gradient(90deg,transparent,#ff7fa980 20%,#efddc4b3 50%,#74edf380 80%,transparent);box-shadow:0 4px 16px #74edf30a;pointer-events:none}
-.footer{padding:10px 20px;display:flex;justify-content:center;align-items:center;border-top:1px solid #394e5c;min-height:52px}
-.footer-band-link{display:inline-block;padding:7px 16px;border:1px solid #687b83;color:var(--cream);font:700 12px 'Barlow Condensed',sans-serif;letter-spacing:1.8px;text-decoration:none;transition:color .15s,border-color .15s}
+.footer{padding:5px 16px;display:flex;justify-content:center;align-items:center;border-top:1px solid #394e5c;min-height:34px}
+.footer-band-link{display:inline-block;padding:4px 12px;border:1px solid #687b83;color:var(--cream);font:700 12px 'Barlow Condensed',sans-serif;letter-spacing:1.8px;text-decoration:none;transition:color .15s,border-color .15s}
 .footer-band-link:hover{color:var(--teal);border-color:var(--teal)}
