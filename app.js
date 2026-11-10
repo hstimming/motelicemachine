@@ -75,7 +75,7 @@
   }
   function homePage(){
     const a=aboutContent();
-    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-sign.webp" width="1536" height="1024" alt="Motel Ice Machine — pink and cyan neon motel sign" fetchpriority="high" decoding="async"></h1></section><section class="section"><h2>Upcoming shows.</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section>`;
+    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-sign.webp" width="1536" height="1024" alt="Motel Ice Machine — pink and cyan neon motel sign" fetchpriority="high" decoding="async"></h1></section><section class="section"><h2>Upcoming shows.</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="band-strip" aria-label="About the band"><a class="footer-band-link" href="#about">THE BAND →</a></section>`;
   }
   function showsPage(){return `<section class="section"><h1>Shows & tickets.</h1>${eventCards(false)}<div class="past-shows"><h2>Past shows.</h2>${eventCards(false,true)}</div></section>`;}
   function aboutPage(){
@@ -341,6 +341,7 @@
   document.addEventListener('submit',e=>{if(e.target.id==='login-form'){void login(e);}else if(e.target.id==='about-form'){e.preventDefault();void saveAbout(e.target);}});
   window.addEventListener('hashchange',async()=>{render();if(getPage()==='band'&&state.member)await loadPrivate();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&db)void loadEvents();});
+  $('year').textContent=new Date().getFullYear();
   if(!db)state.eventsLoaded=true;
   render();
   if(db){
