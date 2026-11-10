@@ -75,7 +75,7 @@
   }
   function homePage(){
     const a=aboutContent();
-    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-sign.webp" width="1536" height="1024" alt="Motel Ice Machine — pink and cyan neon motel sign" fetchpriority="high" decoding="async"></h1><div class="hero-actions"><a class="button" href="#shows">UPCOMING SHOWS ↗</a></div></section><section class="section"><h2>Upcoming shows.</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><p>${safeText(a.home_blurb)}</p><a class="button" href="#about">THE BAND →</a></div></section>`;
+    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-sign.webp" width="1536" height="1024" alt="Motel Ice Machine — pink and cyan neon motel sign" fetchpriority="high" decoding="async"></h1></section><section class="section"><h2>Upcoming shows.</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="paper"><div class="paper-inner"><p>${safeText(a.home_blurb)}</p><a class="button" href="#about">THE BAND →</a></div></section>`;
   }
   function showsPage(){return `<section class="section"><h1>Shows & tickets.</h1>${eventCards(false)}<div class="past-shows"><h2>Past shows.</h2>${eventCards(false,true)}</div></section>`;}
   function aboutPage(){
