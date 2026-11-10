@@ -341,7 +341,6 @@
   document.addEventListener('submit',e=>{if(e.target.id==='login-form'){void login(e);}else if(e.target.id==='about-form'){e.preventDefault();void saveAbout(e.target);}});
   window.addEventListener('hashchange',async()=>{render();if(getPage()==='band'&&state.member)await loadPrivate();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&db)void loadEvents();});
-  $('year').textContent=new Date().getFullYear();
   if(!db)state.eventsLoaded=true;
   render();
   if(db){
