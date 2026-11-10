@@ -1,0 +1,377 @@
+/*
+  Motel Ice Machine: public look (Home, Shows, About).
+
+  Every rule below starts with html[data-zone="public"], which public-zone.js sets only on
+  the public pages. The band login and the band workspace never get these rules, so they
+  look and work exactly as before. Same words and features; only the skin changes.
+
+  Look: the band's poster. Grainy black-and-white motel photo, bold italic safety-orange
+  condensed type, off-white motel paper, black night.
+*/
+@font-face {
+  font-family: "Poster Title";
+  src: url("assets/brand/poster-title.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+}
+
+html[data-zone="public"] {
+  --mim-black: #000;
+  --mim-night: #0c0c0c;
+  --mim-panel: #141414;
+  --mim-line: #2e2e2e;
+  --mim-paper: #ecebe4;
+  --mim-ink: #1d1d1b;
+  --mim-orange: #cf4b21;
+  --mim-orange-hot: #e0582b;
+  --mim-orange-ink: #b23a12;  /* small orange print on paper (5:1) */
+  --mim-steel: #a3a9ab;       /* secondary text on black (8:1) */
+  --mim-display: "Poster Title", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --mim-label: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --mim-body: "DM Sans", Arial, sans-serif;
+  --mim-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+/* ---------- Page ---------- */
+html[data-zone="public"] body {
+  background: var(--mim-black);
+  color: var(--mim-paper);
+  font-family: var(--mim-body);
+}
+html[data-zone="public"] body::after {
+  /* still film grain over the whole page; it never moves */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background-image: var(--mim-grain);
+  opacity: .07;
+}
+html[data-zone="public"] a:focus-visible,
+html[data-zone="public"] button:focus-visible,
+html[data-zone="public"] summary:focus-visible {
+  outline: 3px solid var(--mim-orange);
+  outline-offset: 3px;
+}
+
+/* ---------- Header and menu ---------- */
+html[data-zone="public"] .site-header {
+  background: var(--mim-black);
+  border-bottom: 1px solid var(--mim-line);
+}
+html[data-zone="public"] .small-brand {
+  width: 230px;
+  background: url("assets/brand/wordmark.svg") left center / contain no-repeat;
+}
+html[data-zone="public"] .small-brand img { opacity: 0; } /* keeps its alt text for screen readers */
+html[data-zone="public"] .desktop-nav a {
+  font: italic 900 19px/1 var(--mim-display);
+  letter-spacing: .04em;
+  color: var(--mim-paper);
+}
+html[data-zone="public"] .desktop-nav a:hover { color: var(--mim-orange-hot); }
+html[data-zone="public"] .desktop-nav a[aria-current="page"] {
+  color: var(--mim-orange);
+  text-decoration-color: var(--mim-orange);
+}
+html[data-zone="public"] .menu-button {
+  background: transparent;
+  border: 2px solid var(--mim-paper);
+  color: var(--mim-paper);
+  font: italic 900 17px/1 var(--mim-display);
+  letter-spacing: .04em;
+}
+html[data-zone="public"] .site-menu {
+  background: var(--mim-paper);
+  border: 0;
+  box-shadow: 6px 6px 0 var(--mim-orange);
+}
+html[data-zone="public"] .site-menu a {
+  color: var(--mim-ink);
+  font: italic 900 20px/1 var(--mim-display);
+  text-transform: uppercase;
+  border-bottom: 1px solid #c9c7bd;
+}
+html[data-zone="public"] .site-menu a:hover { background: #dedcd2; }
+html[data-zone="public"] .band-menu-link { color: var(--mim-orange-ink); border-top: 0; }
+
+/* ---------- Home: the poster ---------- */
+html[data-zone="public"] .hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-height: min(calc(100vw * 639 / 386), 900px);
+  padding: 0 16px 34px;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .55) 78%, var(--mim-black) 100%),
+    url("assets/brand/motel-night.webp") center top / 100% auto no-repeat,
+    var(--mim-black);
+}
+html[data-zone="public"] .hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  transform: none;
+  box-shadow: none;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .18) 0 1px, rgba(0, 0, 0, 0) 1px 3px);
+}
+html[data-zone="public"] .hero > * { position: relative; z-index: 1; }
+html[data-zone="public"] .hero-brand {
+  order: 1;
+  width: 95.5%;
+  max-width: 620px;
+  margin: .6vw 0 0 calc(1.8% - 16px);
+  aspect-ratio: 368.79 / 279.92;
+  background: url("assets/brand/lettering.svg") left top / contain no-repeat;
+}
+html[data-zone="public"] .hero-brand img {
+  /* the old sign image stays in the page for its alt text, but isn't shown */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+html[data-zone="public"] .hero-location {
+  order: 2;
+  margin: auto 0 10px;
+  font: 600 13px/1.2 var(--mim-label);
+  letter-spacing: .22em;
+  color: var(--mim-steel);
+}
+html[data-zone="public"] .hero .hero-caption {
+  order: 3;
+  margin: auto 0 0;
+  font: italic 900 clamp(30px, 8vw, 46px)/.95 var(--mim-display);
+  text-transform: uppercase;
+  color: var(--mim-paper);
+}
+html[data-zone="public"] .hero-actions { order: 4; margin-top: 20px; }
+
+@media (min-width: 760px) {
+  html[data-zone="public"] .hero {
+    min-height: min(86vh, 760px);
+    padding: 48px clamp(24px, 6vw, 80px) 56px;
+    justify-content: center;
+    background:
+      linear-gradient(to right, var(--mim-black) 54%, rgba(0, 0, 0, .6) 62%, rgba(0, 0, 0, 0) 74%),
+      linear-gradient(to left, var(--mim-black) 5%, rgba(0, 0, 0, 0) 14%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, var(--mim-black)),
+      url("assets/brand/motel-night.webp") right 6% bottom / auto 112% no-repeat,
+      var(--mim-black);
+  }
+  html[data-zone="public"] .hero-brand { width: min(52vw, 600px); margin: 0 0 8px -6px; }
+  html[data-zone="public"] .hero-location { margin: 18px 0 8px; }
+  html[data-zone="public"] .hero .hero-caption { margin-top: 14px; }
+}
+
+/* ---------- Buttons ---------- */
+html[data-zone="public"] .button,
+html[data-zone="public"] .event-info a.ticket-button {
+  display: inline-block;
+  background: var(--mim-orange);
+  border: 2px solid var(--mim-orange);
+  border-radius: 0;
+  color: var(--mim-black);
+  font: italic 900 20px/1 var(--mim-display);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 20px 12px;
+  filter: none;
+}
+html[data-zone="public"] .button:hover,
+html[data-zone="public"] .event-info a.ticket-button:hover {
+  background: var(--mim-orange-hot);
+  border-color: var(--mim-orange-hot);
+  filter: none;
+}
+html[data-zone="public"] .button.secondary {
+  background: transparent;
+  border-color: var(--mim-paper);
+  color: var(--mim-paper);
+}
+html[data-zone="public"] .button.secondary:hover { background: rgba(236, 235, 228, .1); }
+
+/* ---------- Ticker ---------- */
+html[data-zone="public"] .ticker {
+  background: var(--mim-orange);
+  color: var(--mim-black);
+  border: 0;
+  padding: 12px 14px 11px;
+  font: italic 900 clamp(13px, 3.7vw, 26px)/1.15 var(--mim-display);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ---------- Sections and headings ---------- */
+html[data-zone="public"] .section-eyebrow {
+  font: 700 13px/1.2 var(--mim-label);
+  letter-spacing: .24em;
+  color: var(--mim-orange);
+}
+html[data-zone="public"] .section h1,
+html[data-zone="public"] .section h2 {
+  font: italic 900 clamp(42px, 9vw, 76px)/.92 var(--mim-display);
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: var(--mim-paper);
+  margin: 10px 0 12px;
+}
+html[data-zone="public"] .section p { color: var(--mim-steel); }
+
+/* ---------- Show listings: motel room tags ---------- */
+html[data-zone="public"] .section:not(.work-content) > .event-card,
+html[data-zone="public"] .event-card {
+  background: var(--mim-panel);
+  border: 1px solid var(--mim-line);
+  border-left: 0;
+  box-shadow: none;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+}
+html[data-zone="public"] .event-date {
+  min-width: 86px;
+  padding: 14px 10px;
+  border: 0;
+  background: var(--mim-orange);
+  color: var(--mim-black);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+html[data-zone="public"] .event-date small {
+  font: 700 13px/1.1 var(--mim-label);
+  letter-spacing: .14em;
+  color: var(--mim-black);
+}
+html[data-zone="public"] .event-date b { font: italic 900 46px/.95 var(--mim-display); }
+html[data-zone="public"] .event-info { padding: 16px 18px; }
+html[data-zone="public"] .event-info h3 {
+  font: italic 900 26px/1 var(--mim-display);
+  text-transform: uppercase;
+  color: var(--mim-paper);
+}
+html[data-zone="public"] .event-info p { color: var(--mim-steel); font-size: 14px; }
+html[data-zone="public"] .event-info a { color: var(--mim-orange); }
+html[data-zone="public"] .event-info a.ticket-button { font-size: 18px; padding: 11px 16px 10px; margin-top: 10px; }
+html[data-zone="public"] .event-status {
+  font: 700 11px/1 var(--mim-label);
+  color: var(--mim-steel);
+  border-color: #4a4a4a;
+}
+html[data-zone="public"] .past-shows { border-top-color: var(--mim-line); }
+html[data-zone="public"] .past-shows .past-event {
+  background: var(--mim-night) !important;
+  border-left-color: transparent !important;
+}
+html[data-zone="public"] .past-shows .past-event .event-date { background: #3a3a3a; }
+html[data-zone="public"] .past-shows .past-event .event-date small,
+html[data-zone="public"] .past-shows .past-event .event-date b { color: var(--mim-paper); }
+html[data-zone="public"] .show-setlist { border-top-color: var(--mim-line); }
+html[data-zone="public"] .show-setlist summary { color: var(--mim-orange); }
+html[data-zone="public"] .show-setlist ol { color: var(--mim-paper); }
+html[data-zone="public"] .show-setlist li::marker { color: var(--mim-orange); }
+html[data-zone="public"] .empty { border-color: #4a4a4a; color: var(--mim-steel); }
+
+/* ---------- Home: the band, on motel paper ---------- */
+html[data-zone="public"] .paper {
+  position: relative;
+  background: var(--mim-paper);
+  color: var(--mim-ink);
+  border: 0;
+}
+html[data-zone="public"] .paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--mim-grain);
+  opacity: .12;
+  mix-blend-mode: multiply;
+}
+html[data-zone="public"] .paper-inner { position: relative; border-left: 4px solid var(--mim-orange); }
+html[data-zone="public"] .paper .section-eyebrow { color: var(--mim-orange-ink); }
+html[data-zone="public"] .paper h2 {
+  font: italic 900 clamp(38px, 8vw, 70px)/.92 var(--mim-display);
+  text-transform: uppercase;
+  color: var(--mim-ink);
+}
+html[data-zone="public"] .paper p { color: #3d3d39; }
+html[data-zone="public"] .paper .button {
+  background: var(--mim-ink);
+  border-color: var(--mim-ink);
+  color: var(--mim-paper);
+}
+html[data-zone="public"] .paper .button:hover { background: var(--mim-orange-ink); border-color: var(--mim-orange-ink); }
+
+/* ---------- About ---------- */
+html[data-zone="public"] .about-bio { color: var(--mim-paper); }
+html[data-zone="public"] .about-hero-photo {
+  border: 10px solid var(--mim-paper);
+  box-shadow: 8px 8px 0 var(--mim-orange);
+  object-position: 50% 30%;
+}
+html[data-zone="public"] .member-card { border-top-color: var(--mim-line); }
+html[data-zone="public"] .member-card img { border-color: var(--mim-paper); }
+html[data-zone="public"] .member-card h3 {
+  font: italic 900 28px/1 var(--mim-display);
+  text-transform: uppercase;
+}
+html[data-zone="public"] .member-card strong { color: var(--mim-orange); }
+html[data-zone="public"] .member-card p { color: var(--mim-steel); }
+html[data-zone="public"] .about-contact { border-top-color: var(--mim-line); }
+html[data-zone="public"] .about-contact a:not(.button) { color: var(--mim-orange-hot); }
+
+/* ---------- Link to the band page above the footer ---------- */
+html[data-zone="public"] .band-strip {
+  background: var(--mim-black);
+  border-top: 1px solid var(--mim-line);
+  padding: 18px 16px;
+}
+html[data-zone="public"] .footer-band-link {
+  border: 2px solid var(--mim-paper);
+  color: var(--mim-paper);
+  font: italic 900 20px/1 var(--mim-display);
+  letter-spacing: .04em;
+  padding: 11px 18px 10px;
+}
+html[data-zone="public"] .footer-band-link:hover { color: var(--mim-orange-hot); border-color: var(--mim-orange-hot); }
+
+/* ---------- Footer ---------- */
+html[data-zone="public"] .footer { background: var(--mim-black); border-top: 1px solid var(--mim-line); }
+html[data-zone="public"] .footer-brand {
+  font: italic 900 38px/1 var(--mim-display);
+  text-transform: uppercase;
+  color: var(--mim-orange);
+}
+html[data-zone="public"] .footer-brand span { color: var(--mim-orange); }
+html[data-zone="public"] .footer p { font-family: var(--mim-label); color: var(--mim-steel); }
+html[data-zone="public"] .footer small { color: #8a8f91; }
+
+/* ---------- Notices ---------- */
+html[data-zone="public"] .toast {
+  background: var(--mim-paper);
+  color: var(--mim-ink);
+  border: 0;
+  box-shadow: 6px 6px 0 var(--mim-orange);
+}
+html[data-zone="public"] .toast.is-error { background: #ffd2c4; }
+
+@media (max-width: 680px) {
+  html[data-zone="public"] .small-brand { width: 190px; }
+  html[data-zone="public"] .event-date { min-width: 68px; }
+  html[data-zone="public"] .event-date b { font-size: 38px; }
+  html[data-zone="public"] .event-info { padding: 12px 14px; }
+  html[data-zone="public"] .event-info h3 { font-size: 22px; }
+}
