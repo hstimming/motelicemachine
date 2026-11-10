@@ -989,11 +989,8 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.textContent = 'Get tickets';
-      a.setAttribute('aria-describedby', 'ticket-note');
       slot.textContent = '';
       slot.appendChild(a);
-      note.textContent = 'Opens Partiful in a new tab.';
-      note.hidden = false;
     }
 
     /* ---------- Wiring ---------- */
