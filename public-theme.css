@@ -134,7 +134,7 @@ html[data-zone="public"][data-skin="orange"] .hero-brand {
   background: none;
 }
 html[data-zone="public"][data-skin="orange"] .hero-brand img {
-  position: static;
+  position: relative;
   display: block;
   width: 100%;
   height: auto;
@@ -162,10 +162,9 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
     padding: 48px clamp(24px, 6vw, 80px) 56px;
     justify-content: center;
     background:
-      radial-gradient(ellipse 34% 85% at 82% 48%, transparent 18%, rgba(0, 0, 0, .14) 48%, rgba(0, 0, 0, .68) 78%, var(--mim-black) 100%),
-      linear-gradient(to right, var(--mim-black) 50%, rgba(0, 0, 0, .88) 57%, rgba(0, 0, 0, .4) 66%, transparent 78%),
-      linear-gradient(to left, var(--mim-black) 3%, rgba(0, 0, 0, .9) 7%, rgba(0, 0, 0, .38) 16%, transparent 29%),
-      linear-gradient(to bottom, rgba(0, 0, 0, .65), transparent 25%, transparent 60%, var(--mim-black) 100%),
+      linear-gradient(to right, var(--mim-black) 42%, rgba(0, 0, 0, .95) 49%, rgba(0, 0, 0, .7) 57%, rgba(0, 0, 0, .3) 67%, transparent 82%),
+      linear-gradient(to left, rgba(0, 0, 0, .35), transparent 12%),
+      linear-gradient(to bottom, transparent 84%, rgba(0, 0, 0, .35)),
       url("assets/brand/motel-night.webp") right 6% bottom / auto 112% no-repeat,
       var(--mim-black);
   }
