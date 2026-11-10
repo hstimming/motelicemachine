@@ -9,4 +9,4 @@
   links are accepted. Placeholders (like the example above) and links
   to any other site keep the button disabled.
 */
-window.MIM_TICKET_LINK = "";
+window.MIM_TICKET_LINK = "https://partiful.com/e/8fZ59D57RdlaAuvtwJ7W?focus=invite";
