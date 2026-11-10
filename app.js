@@ -137,7 +137,14 @@
     const hero=document.querySelector?.('.hero');
     const sign=document.querySelector?.('.hero-brand');
     if(!hero||!sign)return;
-    const extension=Math.max(0,hero.getBoundingClientRect().bottom-sign.getBoundingClientRect().bottom);
+    const signRect=sign.getBoundingClientRect();
+    const image=sign.querySelector?.('img');
+    if(image){
+      const imageRect=image.getBoundingClientRect();
+      // Start just inside the bottom frame, so supports tuck behind the sign.
+      sign.style.setProperty('--post-top',Math.max(0,imageRect.top-signRect.top+imageRect.height*.85)+'px');
+    }
+    const extension=Math.max(0,hero.getBoundingClientRect().bottom-signRect.bottom);
     sign.style.setProperty('--post-extension',extension+'px');
   }
   function scheduleSignSupports(){window.requestAnimationFrame?.(alignSignSupports);}

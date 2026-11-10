@@ -170,7 +170,8 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
   }
   /* computers: the logo as three straight stacked lines beside the photo */
   html[data-zone="public"][data-skin="orange"] .hero-brand {
-    width: min(40vw, 540px);
+    width: min(48vw, 660px);
+    max-width: 660px;
     margin: 0;
     aspect-ratio: auto;
     background-image: none;
