@@ -2,7 +2,7 @@
 
 A standalone page for one show: Motel Ice Machine at Blueberry Hill, St. Louis, Monday, December 7, 2026, 9 PM.
 
-Address once it's merged: https://hstimming.github.io/motelicemachine/blueberry-hill/
+Address once it's merged: https://motel-ice-machine.com/blueberry-hill/
 
 Visitors arrive at a dark security-camera view of the motel, walk up to the ice machine, open its door, and find a guest registration card with the show details and the ticket button.
 
@@ -27,7 +27,7 @@ After this page is live, a band member edits the Blueberry Hill show in the Even
 ## Accessibility
 
 - Works with touch, mouse, and keyboard (Tab, Enter, and the Up and Down arrow keys).
-- A link ending in `#tickets` (https://hstimming.github.io/motelicemachine/blueberry-hill/#tickets) opens the card directly.
+- A link ending in `#tickets` (https://motel-ice-machine.com/blueberry-hill/#tickets) opens the card directly.
 - If the visitor's device is set to reduce motion, nothing moves or flickers.
 - The flicker is slow and shallow, and the page never flashes. There is no sound.
 - Screen readers hear a short line at each step, plus the date and time in the page heading.
