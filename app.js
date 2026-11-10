@@ -133,10 +133,23 @@
     }
   }
   function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
+  function alignSignSupports(){
+    const hero=document.querySelector?.('.hero');
+    const sign=document.querySelector?.('.hero-brand');
+    if(!hero||!sign)return;
+    const extension=Math.max(0,hero.getBoundingClientRect().bottom-sign.getBoundingClientRect().bottom);
+    sign.style.setProperty('--post-extension',extension+'px');
+  }
+  function scheduleSignSupports(){window.requestAnimationFrame?.(alignSignSupports);}
+  window.addEventListener('resize',scheduleSignSupports,{passive:true});
+  document.addEventListener('load',event=>{
+    if(event.target.matches?.('.hero-brand img'))scheduleSignSupports();
+  },true);
   function render(){
     window.setMotelSkin?.(aboutContent().site_skin);
     const page=getPage();$('view').innerHTML=page==='home'?homePage():page==='shows'?showsPage():page==='about'?aboutPage():page==='band'?(state.member?workspace():loginPage()):homePage();
     updateMenu();
+    scheduleSignSupports();
     document.querySelectorAll('.desktop-nav a, .site-menu a').forEach(a=>{if(a.hash==='#'+page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   }
   async function loadAbout(){
