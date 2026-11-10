@@ -46,7 +46,7 @@ After this page is live, a band member edits the Blueberry Hill show in the Even
 
 ## Artwork
 
-The motel photo and the logo lettering are band artwork. They are not covered by the CC0 dedication in the repository's `LICENSE` file. A separate pull request will add a note to the license that says so and names their owners.
+The motel photo and the logo lettering were created by Will Aitchison, who owns them. They are not covered by the CC0 dedication in the repository's `LICENSE` file. See [NOTICE.md](../NOTICE.md).
 
 ## Preview on your own computer
 
