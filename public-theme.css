@@ -98,6 +98,10 @@ html[data-zone="public"][data-skin="orange"] .site-menu a {
 html[data-zone="public"][data-skin="orange"] .site-menu a:hover { background: #dedcd2; }
 html[data-zone="public"][data-skin="orange"] .band-menu-link { color: var(--mim-orange-ink); border-top: 0; }
 
+/* The root data-home-photo attribute selects the alternate or original photo. */
+html{--home-photo:url("assets/brand/motel-night.webp");--home-photo-aspect:386 / 639;--home-photo-height:1.65544;--home-photo-mask:radial-gradient(ellipse 58% 49% at 56% 65%,#000 22%,rgba(0,0,0,.96) 45%,rgba(0,0,0,.58) 73%,transparent 100%)}
+html[data-home-photo="alternate"]{--home-photo:url("assets/brand/motel-night-alternate.webp");--home-photo-aspect:1122 / 1402;--home-photo-height:1.24955;--home-photo-mask:none}
+
 /* ---------- Home: the poster ---------- */
 html[data-zone="public"][data-skin="orange"] .hero {
   position: relative;
@@ -105,12 +109,12 @@ html[data-zone="public"][data-skin="orange"] .hero {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  min-height: min(calc(100vw * 639 / 386), 900px);
+  min-height: min(calc(100vw * var(--home-photo-height)), 900px);
   padding: 0 16px 34px;
   overflow: hidden;
   background:
     linear-gradient(to bottom, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .55) 78%, var(--mim-black) 100%),
-    url("assets/brand/motel-night.webp") center top / 100% auto no-repeat,
+    var(--home-photo) center top / 100% auto no-repeat,
     var(--mim-black);
 }
 html[data-zone="public"][data-skin="orange"] .hero::after {
@@ -170,10 +174,10 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
     right: 6%;
     bottom: 0;
     height: 112%;
-    aspect-ratio: 386 / 639;
-    background: url("assets/brand/motel-night.webp") center / cover no-repeat;
-    -webkit-mask-image: radial-gradient(ellipse 58% 49% at 56% 65%, #000 22%, rgba(0,0,0,.96) 45%, rgba(0,0,0,.58) 73%, transparent 100%);
-    mask-image: radial-gradient(ellipse 58% 49% at 56% 65%, #000 22%, rgba(0,0,0,.96) 45%, rgba(0,0,0,.58) 73%, transparent 100%);
+    aspect-ratio: var(--home-photo-aspect);
+    background: var(--home-photo) center / cover no-repeat;
+    -webkit-mask-image: var(--home-photo-mask);
+    mask-image: var(--home-photo-mask);
     pointer-events: none;
   }
   /* computers: the logo as three straight stacked lines beside the photo */
