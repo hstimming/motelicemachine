@@ -143,12 +143,15 @@
     if(!light||neonMotion?.matches||document.hidden)return;
     function pulse(){
       if(!light.isConnected)return;
-      const dip=.05+Math.random()*.13;
-      const duration=150+Math.random()*210;
+      const dip=.07+Math.random()*.25;
+      const recovery=.38+Math.random()*.08;
+      const spillRatio=.56+Math.random()*.1;
+      const duration=120+Math.random()*310;
       const offset=.25+Math.random()*.25;
-      neonAnimation=light.animate?.([{opacity:.5},{opacity:dip,offset},{opacity:.5}],{duration,easing:'ease-in-out'});
-      neonSpillAnimation=spill?.animate?.([{opacity:.32},{opacity:dip*.6,offset},{opacity:.32}],{duration:duration+100,easing:'ease-in-out'});
-      neonTimer=setTimeout(pulse,650+Math.random()*5500);
+      neonAnimation=light.animate?.([{opacity:.46},{opacity:dip,offset},{opacity:recovery,offset:.82},{opacity:.46}],{duration,easing:'ease-in-out'});
+      neonSpillAnimation=spill?.animate?.([{opacity:.29},{opacity:dip*spillRatio,offset},{opacity:recovery*spillRatio,offset:.82},{opacity:.29}],{duration:duration+100,easing:'ease-in-out'});
+      const pause=Math.random()<.3?250+Math.random()*750:1200+Math.random()*6500;
+      neonTimer=setTimeout(pulse,duration+pause);
     }
     neonTimer=setTimeout(pulse,600+Math.random()*1800);
   }
