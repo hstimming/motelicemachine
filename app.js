@@ -16,6 +16,7 @@
     const toast=$('message'); toast.textContent=message; toast.className='toast'+(error?' is-error':'');toast.hidden=false;
     clearTimeout(timeout); timeout=setTimeout(()=>toast.hidden=true,5500);
   };
+  const practice=window.createPracticeCalendar?.({db,user:()=>state.user,isMember:()=>state.member,notify});
   const getPage = () => (location.hash || '#home').slice(1).split('?')[0];
   const today = () => { const d=new Date(); return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); };
   function dateParts(date) { const d=new Date(`${date}T12:00:00`);return {month:d.toLocaleString('en-US',{month:'short'}).toUpperCase(),day:d.getDate()}; }
@@ -132,7 +133,7 @@
       if(submit.isConnected){submit.disabled=false;submit.textContent='PUBLISH CHANGES →';}
     }
   }
-  function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
+  function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="tab" data-tab="practice" class="${state.tab==='practice'?'active':''}">▦ PRACTICE</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='practice'?(practice?.render()||''):state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
   function alignSignSupports(){
     const hero=document.querySelector?.('.hero');
     const sign=document.querySelector?.('.hero-brand');
@@ -141,8 +142,6 @@
     const image=sign.querySelector?.('img');
     if(image){
       const imageRect=image.getBoundingClientRect();
-      hero.style.setProperty('--mobile-photo-height',(imageRect.height*.724)+'px');
-      hero.style.setProperty('--mobile-photo-bottom',Math.max(0,hero.getBoundingClientRect().bottom-imageRect.top-imageRect.height*.862)+'px');
       sign.style.setProperty('--panel-top',(imageRect.top-signRect.top+imageRect.height*.138)+'px');
       sign.style.setProperty('--panel-height',(imageRect.height*.724)+'px');
       // Start just inside the bottom frame, so supports tuck behind the sign.
@@ -159,6 +158,7 @@
   function render(){
     window.setMotelSkin?.(aboutContent().site_skin);
     const page=getPage();$('view').innerHTML=page==='home'?homePage():page==='shows'?showsPage():page==='about'?aboutPage():page==='band'?(state.member?workspace():loginPage()):homePage();
+    if(page==='band'&&state.member&&state.tab==='practice')practice?.mount();
     updateMenu();
     scheduleSignSupports();
     document.querySelectorAll('.desktop-nav a, .site-menu a').forEach(a=>{if(a.hash==='#'+page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
@@ -324,8 +324,8 @@
   async function action(button){
     const kind=button.dataset.action,id=Number(button.dataset.id);
     if(!state.member&&kind!=='refresh')return;
-    if(kind==='tab'){state.tab=button.dataset.tab;await loadPrivate();return;}
-    if(kind==='refresh'){await Promise.all([loadEvents(),loadPrivate()]);notify('Data refreshed.');return;}
+    if(kind==='tab'){state.tab=button.dataset.tab;if(state.tab==='practice'){await practice?.load();render();}else await loadPrivate();return;}
+    if(kind==='refresh'){if(state.tab==='practice')await practice?.load();await Promise.all([loadEvents(),loadPrivate()]);notify('Data refreshed.');return;}
     if(kind==='logout'){await db.auth.signOut();state.member=false;state.user=null;location.hash='#home';notify('Signed out.');return;}
     if(kind==='new-event'){editEvent();return;}
     if(kind==='edit-event'){editEvent(id);return;}

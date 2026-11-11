@@ -192,10 +192,6 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
   html[data-zone="public"][data-skin="orange"] .hero .hero-caption { margin-top: 14px; }
 
 @media (max-width: 759px) {
-  html[data-zone="public"][data-skin="orange"] .hero::before {
-    height: var(--mobile-photo-height, 23.168vw);
-    bottom: var(--mobile-photo-bottom, 60px);
-  }
   html[data-zone="public"][data-skin="orange"] .hero {
     min-height: clamp(240px, 52vw, 390px);
     padding: clamp(12px, 3vw, 24px) clamp(12px, 6vw, 24px) 0;
