@@ -79,10 +79,5 @@
 
 /* Pulse only the bright tubing layer; the plate, frame and posts stay steady. */
 .hero-brand img{animation:none}
-.hero-brand .neon-light{position:absolute;z-index:2;top:0;left:0;width:100%;aspect-ratio:1536 / 1024;background:url("assets/motel-neon-orange-dark.webp") center/100% 100% no-repeat;clip-path:inset(16% 4% 17%);mix-blend-mode:screen;filter:brightness(1.2) contrast(4) saturate(1.15) blur(.5px);opacity:.25;pointer-events:none;animation:motel-tube-flicker 7s linear infinite}
-@keyframes motel-tube-flicker{
-  0%,8%,14%,29%,35%,61%,67%,85%,91%,100%{opacity:.25}
-  10%,32%,64%,88%{opacity:.14}
-  12%,33.5%,65.5%,89.5%{opacity:.22}
-}
+.hero-brand .neon-light{position:absolute;z-index:2;top:0;left:0;width:100%;aspect-ratio:1536 / 1024;background:url("assets/motel-neon-orange-dark.webp") center/100% 100% no-repeat;clip-path:inset(16% 4% 17%);mix-blend-mode:screen;filter:brightness(1.2) contrast(4) saturate(1.15) blur(.5px);opacity:.25;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.hero-brand .neon-light{animation:none}}

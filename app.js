@@ -134,6 +134,23 @@
     }
   }
   function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="tab" data-tab="practice" class="${state.tab==='practice'?'active':''}">▦ PRACTICE</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='practice'?(practice?.render()||''):state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
+  let neonTimer,neonAnimation;
+  const neonMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  function syncNeonFlicker(){
+    clearTimeout(neonTimer);neonAnimation?.cancel();
+    const light=document.querySelector?.('.neon-light');
+    if(!light||neonMotion?.matches||document.hidden)return;
+    function pulse(){
+      if(!light.isConnected)return;
+      const dip=.13+Math.random()*.10;
+      const duration=100+Math.random()*170;
+      neonAnimation=light.animate?.([{opacity:.25},{opacity:dip,offset:.25+Math.random()*.25},{opacity:.25}],{duration,easing:'ease-in-out'});
+      neonTimer=setTimeout(pulse,650+Math.random()*5500);
+    }
+    neonTimer=setTimeout(pulse,600+Math.random()*1800);
+  }
+  neonMotion?.addEventListener('change',syncNeonFlicker);
+  document.addEventListener('visibilitychange',syncNeonFlicker);
   function alignSignSupports(){
     const hero=document.querySelector?.('.hero');
     const sign=document.querySelector?.('.hero-brand');
@@ -160,6 +177,7 @@
     const page=getPage();$('view').innerHTML=page==='home'?homePage():page==='shows'?showsPage():page==='about'?aboutPage():page==='band'?(state.member?workspace():loginPage()):homePage();
     if(page==='band'&&state.member&&state.tab==='practice')practice?.mount();
     updateMenu();
+    syncNeonFlicker();
     scheduleSignSupports();
     document.querySelectorAll('.desktop-nav a, .site-menu a').forEach(a=>{if(a.hash==='#'+page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   }
