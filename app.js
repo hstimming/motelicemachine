@@ -76,7 +76,7 @@
   }
   function homePage(){
     const a=aboutContent();
-    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-orange-dark.webp" width="1536" height="1024" alt="Motel Ice Machine" fetchpriority="high" decoding="async"><span class="sign-edge-shade" aria-hidden="true"></span><span class="sign-post sign-post-left" aria-hidden="true"></span><span class="sign-post sign-post-right" aria-hidden="true"></span></h1></section><section class="section"><h2>Upcoming shows</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="band-strip" aria-label="About the band"><a class="footer-band-link" href="#about">THE BAND →</a></section>`;
+    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-orange-dark.webp" width="1536" height="1024" alt="Motel Ice Machine" fetchpriority="high" decoding="async"><span class="neon-light" aria-hidden="true"></span><span class="sign-edge-shade" aria-hidden="true"></span><span class="sign-post sign-post-left" aria-hidden="true"></span><span class="sign-post sign-post-right" aria-hidden="true"></span></h1></section><section class="section"><h2>Upcoming shows</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="band-strip" aria-label="About the band"><a class="footer-band-link" href="#about">THE BAND →</a></section>`;
   }
   function showsPage(){return `<section class="section"><h1>Shows & tickets</h1>${eventCards(false)}<div class="past-shows"><h2>Past shows</h2>${eventCards(false,true)}</div></section>`;}
   function aboutPage(){
