@@ -160,7 +160,7 @@ html[data-zone="public"][data-skin="orange"] .hero .hero-caption {
 }
 html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-top: 20px; }
 
-@media (min-width: 760px) {
+/* Shared composition at every screen size: sign left, photo right. */
   html[data-zone="public"][data-skin="orange"] .hero {
     min-height: min(78vh, 680px);
     padding: 48px clamp(24px, 6vw, 80px) 56px;
@@ -190,6 +190,17 @@ html[data-zone="public"][data-skin="orange"] .hero-actions { order: 4; margin-to
   }
   html[data-zone="public"][data-skin="orange"] .hero-location { margin: 18px 0 8px; }
   html[data-zone="public"][data-skin="orange"] .hero .hero-caption { margin-top: 14px; }
+
+@media (max-width: 759px) {
+  html[data-zone="public"][data-skin="orange"] .hero {
+    min-height: clamp(240px, 52vw, 390px);
+    padding: clamp(12px, 3vw, 24px) clamp(12px, 6vw, 24px) 0;
+  }
+  html[data-zone="public"][data-skin="orange"] .hero-brand {
+    width: 48vw;
+    max-width: 660px;
+    margin: 0;
+  }
 }
 
 /* ---------- Buttons ---------- */
