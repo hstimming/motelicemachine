@@ -76,7 +76,7 @@
   }
   function homePage(){
     const a=aboutContent();
-    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-orange-dark.webp" width="1536" height="1024" alt="Motel Ice Machine" fetchpriority="high" decoding="async"><span class="neon-light" aria-hidden="true"></span><span class="sign-edge-shade" aria-hidden="true"></span><span class="sign-post sign-post-left" aria-hidden="true"></span><span class="sign-post sign-post-right" aria-hidden="true"></span></h1></section><section class="section"><h2>Upcoming shows</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="band-strip" aria-label="About the band"><a class="footer-band-link" href="#about">THE BAND →</a></section>`;
+    return `<section class="hero"><h1 class="hero-brand"><img src="assets/motel-neon-orange-dark.webp" width="1536" height="1024" alt="Motel Ice Machine" fetchpriority="high" decoding="async"><span class="neon-spill" aria-hidden="true"></span><span class="neon-light" aria-hidden="true"></span><span class="sign-edge-shade" aria-hidden="true"></span><span class="sign-post sign-post-left" aria-hidden="true"></span><span class="sign-post sign-post-right" aria-hidden="true"></span></h1></section><section class="section"><h2>Upcoming shows</h2>${eventCards(false)}<div class="section-link"><a class="button secondary" href="#shows">ALL SHOWS →</a></div></section><section class="band-strip" aria-label="About the band"><a class="footer-band-link" href="#about">THE BAND →</a></section>`;
   }
   function showsPage(){return `<section class="section"><h1>Shows & tickets</h1>${eventCards(false)}<div class="past-shows"><h2>Past shows</h2>${eventCards(false,true)}</div></section>`;}
   function aboutPage(){
@@ -134,17 +134,20 @@
     }
   }
   function workspace(){return `<div class="workspace-bar"><div class="section-eyebrow" style="color:#604530">PRIVATE / BAND MEMBERS ONLY</div><h1>THE BACK OFFICE</h1><p>Manage the live website and your band's songs.</p><button class="small-button" data-action="logout">LOG OUT</button></div><div class="workspace-tabs"><button data-action="tab" data-tab="events" class="${state.tab==='events'?'active':''}">▣ EVENTS</button><button data-action="tab" data-tab="songs" class="${state.tab==='songs'?'active':''}">♫ SONGS & VOTES</button><button data-action="tab" data-tab="setlists" class="${state.tab==='setlists'?'active':''}">☷ SETLISTS</button><button data-action="tab" data-tab="website" class="${state.tab==='website'?'active':''}">✎ WEBSITE EDITOR</button><button data-action="tab" data-tab="practice" class="${state.tab==='practice'?'active':''}">▦ PRACTICE</button><button data-action="refresh">↻ REFRESH</button></div><section class="work-content">${state.tab==='practice'?(practice?.render()||''):state.tab==='events'?`<div class="workhead"><div><h2>EVENTS MANAGER</h2><p>Changes here automatically update public show listings.</p></div><button class="button" data-action="new-event">+ ADD SHOW</button></div>${eventCards(true)}`:state.tab==='songs'?songsTab():state.tab==='website'?websiteTab():setlistTab()}</section>`;}
-  let neonTimer,neonAnimation;
+  let neonTimer,neonAnimation,neonSpillAnimation;
   const neonMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
   function syncNeonFlicker(){
-    clearTimeout(neonTimer);neonAnimation?.cancel();
+    clearTimeout(neonTimer);neonAnimation?.cancel();neonSpillAnimation?.cancel();
     const light=document.querySelector?.('.neon-light');
+    const spill=document.querySelector?.('.neon-spill');
     if(!light||neonMotion?.matches||document.hidden)return;
     function pulse(){
       if(!light.isConnected)return;
-      const dip=.13+Math.random()*.10;
-      const duration=100+Math.random()*170;
-      neonAnimation=light.animate?.([{opacity:.25},{opacity:dip,offset:.25+Math.random()*.25},{opacity:.25}],{duration,easing:'ease-in-out'});
+      const dip=.05+Math.random()*.13;
+      const duration=150+Math.random()*210;
+      const offset=.25+Math.random()*.25;
+      neonAnimation=light.animate?.([{opacity:.5},{opacity:dip,offset},{opacity:.5}],{duration,easing:'ease-in-out'});
+      neonSpillAnimation=spill?.animate?.([{opacity:.32},{opacity:dip*.6,offset},{opacity:.32}],{duration:duration+100,easing:'ease-in-out'});
       neonTimer=setTimeout(pulse,650+Math.random()*5500);
     }
     neonTimer=setTimeout(pulse,600+Math.random()*1800);
