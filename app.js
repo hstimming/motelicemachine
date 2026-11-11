@@ -141,6 +141,8 @@
     const image=sign.querySelector?.('img');
     if(image){
       const imageRect=image.getBoundingClientRect();
+      hero.style.setProperty('--mobile-photo-height',(imageRect.height*.724)+'px');
+      hero.style.setProperty('--mobile-photo-bottom',Math.max(0,hero.getBoundingClientRect().bottom-imageRect.top-imageRect.height*.862)+'px');
       sign.style.setProperty('--panel-top',(imageRect.top-signRect.top+imageRect.height*.138)+'px');
       sign.style.setProperty('--panel-height',(imageRect.height*.724)+'px');
       // Start just inside the bottom frame, so supports tuck behind the sign.
