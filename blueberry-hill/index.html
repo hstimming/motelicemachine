@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Motel Ice Machine at Blueberry Hill</title>
-<meta name="description" content="Motel Ice Machine live at Blueberry Hill in St. Louis on Monday, December 7, 2026 at 9 PM. Walk up to the ice machine to find your invitation.">
+<meta name="description" content="Motel Ice Machine live at Blueberry Hill in St. Louis on Monday, December 7, 2026 from 7 to 10 PM. Walk up to the ice machine to find your invitation.">
 <meta name="theme-color" content="#000000">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Motel Ice Machine at Blueberry Hill">
-<meta property="og:description" content="Monday, December 7, 2026, 9 PM. Blueberry Hill, St. Louis.">
+<meta property="og:description" content="Monday, December 7, 2026, 7-10 PM. Blueberry Hill, St. Louis.">
 <meta property="og:url" content="https://motel-ice-machine.com/blueberry-hill/">
 <meta property="og:image" content="https://motel-ice-machine.com/blueberry-hill/assets/share-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Motel Ice Machine at Blueberry Hill, Monday, December 7, 2026, 9 PM.">
+<meta property="og:image:alt" content="Motel Ice Machine at Blueberry Hill, Monday, December 7, 2026, 7-10 PM.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="assets/motel-night.webp" as="image" type="image/webp">
 <script>document.documentElement.classList.add('js');</script>
@@ -701,7 +701,7 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
             <span class="puff p4"></span><span class="puff p5"></span><span class="puff p6"></span>
             <span class="puff p7"></span><span class="puff p8"></span><span class="puff p9"></span>
           </div>
-          <h1 class="lettering"><img src="assets/lettering.svg" width="369" height="280" alt="Motel Ice Machine"><span class="sr-only"> live at Blueberry Hill, Monday, December 7, 9 PM</span></h1>
+          <h1 class="lettering"><img src="assets/lettering.svg" width="369" height="280" alt="Motel Ice Machine"><span class="sr-only"> live at Blueberry Hill, Monday, December 7, 7-10 PM</span></h1>
         </div>
       </div>
       <div class="fx" aria-hidden="true">
@@ -714,7 +714,7 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
       <div class="hud" aria-hidden="true">
         <span class="rec">REC&nbsp; CAM 02</span>
         <span>12/07/2026 MON</span>
-        <span id="clock">21:00:00</span>
+        <span id="clock">19:00:00</span>
       </div>
     </div>
 
@@ -737,7 +737,7 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
         <h2 class="invite-title" id="invite-title" tabindex="-1">Motel Ice Machine</h2>
         <dl class="fields">
           <div class="field"><dt>Date</dt><dd><time datetime="2026-12-07">Mon, Dec 7, 2026</time></dd></div>
-          <div class="field"><dt>Time</dt><dd><time datetime="2026-12-07T21:00">9 PM</time></dd></div>
+          <div class="field"><dt>Time</dt><dd><time datetime="2026-12-07T19:00">7-10 PM</time></dd></div>
           <div class="field"><dt>Venue</dt><dd>Blueberry Hill</dd></div>
           <div class="field"><dt>City</dt><dd>St. Louis</dd></div>
         </dl>
@@ -791,7 +791,7 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
     const LAST = 2;                               // the step where the door can be opened
     const SHOTS = [
       { region: null,
-        line: 'Blueberry Hill. Dec 7, 9 PM. Your invitation is in the ice machine.' },
+        line: 'Blueberry Hill. Dec 7, 7-10 PM. Your invitation is in the ice machine.' },
       { region: { x: 88, y: 268, w: 284, h: 344 },
         line: 'You cross the lot. The ice machine hums under the light.' },
       { region: { x: 118, y: 370, w: 184, h: 232 },
@@ -821,10 +821,10 @@ html:not(.js) .invite-card { transform: none; margin: 0 auto; }
       else if (mq.addListener) mq.addListener(applyMotion);
     }
 
-    /* ---------- Security-camera clock: starts at showtime, 21:00:00 ---------- */
+    /* ---------- Security-camera clock: starts at showtime, 19:00:00 ---------- */
     function renderClock() {
       const sec = reduced() ? 0 : Math.floor((Date.now() - loadedAt) / 1000);
-      const t = 21 * 3600 + sec;
+      const t = 19 * 3600 + sec;
       const two = (n) => String(n).padStart(2, '0');
       clock.textContent = two(Math.floor(t / 3600) % 24) + ':' + two(Math.floor(t / 60) % 60) + ':' + two(t % 60);
     }
